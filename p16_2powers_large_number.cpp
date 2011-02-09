@@ -48,7 +48,7 @@ string power_of_2(int power) {
 	
 	for(int i = 1; i < power; i++) {
 		result = sum(result, result);
-		cout << result << " ";
+		//cout << result << " ";
 	}
 	
 	return result;

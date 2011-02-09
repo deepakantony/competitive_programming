@@ -1,0 +1,9 @@
+#include <iostream>
+
+using std::cout;
+using std::cerr;
+using std::endl;
+
+int main() {
+	cout << "Not an error message" << endl;
+	cerr << "This is an error message" << endl;

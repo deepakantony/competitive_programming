@@ -61,7 +61,7 @@ Graph construct_grid_graph(int size) {
 int main(int argc, char *argv[]) {
 	int grid_size = atoi(argv[1]);
 	Graph G = construct_grid_graph(grid_size);
-	
+	cout << "Graph constructed" << endl;
 	cout << number_of_paths(G, 0, grid_size*grid_size - 1) << endl;
 
 	return 0;
