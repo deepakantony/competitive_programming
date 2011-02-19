@@ -18,7 +18,7 @@ void sort(T begin, T end, Compare cmp) {
 
 }
 
-int sum_of_string
+int sum_of_string_number()
 
 int main(int argc, char **argv) {
 	return 0;
