@@ -15,9 +15,9 @@ int number_of_distinct_terms(int max) {
 			vector<bool> distinct_b(max, true);
 			int p = power_of_x[a-2]->y;
 			for(int i = 1; i < p; i++){
-				for(int b = 2; p*b/i <= max; b++) {
+				for(int b = 2; (p*b)/i <= max; b++) {
 					if((b*p)%i == 0){
-						distinct_b[p*b/i - 2] = false;
+						distinct_b[(p*b)/i - 2] = false;
 					}
 				}
 			}
@@ -32,6 +32,7 @@ int number_of_distinct_terms(int max) {
 		for(int b = 2; b <= max && pow(a,b) <= max; b++)
 			if(!power_of_x[pow(a,b) - 2]) {
 				int pow_a_b = pow(a,b);
+				cout << pow_a_b << endl;
 				power_of_x[pow_a_b - 2] = new power_pair;
 				power_of_x[pow_a_b - 2]->x = a;
 				power_of_x[pow_a_b - 2]->y = b;
