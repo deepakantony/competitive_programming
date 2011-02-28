@@ -5,45 +5,42 @@
 
 using namespace std;
 
-typedef struct _pair { int x; int y; } power_pair;
+int int_pow(int a, int b) {
+	int pow_a_b = 1;
+	for(int i = 0; i < b; i++)
+		pow_a_b *= a;
+		
+	return pow_a_b;
+}
 
-int number_of_distinct_terms(int max) {
-	vector<power_pair*> power_of_x(max);
-	int total_distinct = 0;
-	for(int a = 2; a <= max; a++) {
-		if(power_of_x[a-2]) {
-			vector<bool> distinct_b(max, true);
-			int p = power_of_x[a-2]->y;
-			for(int i = 1; i < p; i++){
-				for(int b = 2; (p*b)/i <= max; b++) {
-					if((b*p)%i == 0){
-						distinct_b[(p*b)/i - 2] = false;
-					}
-				}
-			}
-			
-			for(int b = 2; b <= max; b++)
-				if(distinct_b[b-2])
-					total_distinct++;
-		}
-		else total_distinct += (max-1);
-
-		// Mark all its powers!
-		for(int b = 2; b <= max && pow(a,b) <= max; b++)
-			if(!power_of_x[pow(a,b) - 2]) {
-				int pow_a_b = pow(a,b);
-				cout << pow_a_b << endl;
-				power_of_x[pow_a_b - 2] = new power_pair;
-				power_of_x[pow_a_b - 2]->x = a;
-				power_of_x[pow_a_b - 2]->y = b;
-			}
-	}
+int count_distinct_terms(int max) {
+	bool distinct[max+1][max+1];
 	
-	return total_distinct;
+	for(int i = 0; i <= max; i++)
+		for(int j = 0; j <= max; j++)
+			distinct[i][j] = true;
+	
+	for(int i = 2; i*i <= max; i++)
+		for(int j = 2; int_pow(i,j) <= max; j++) {
+			int pow_i_j = int_pow(i,j);
+			
+			for(int k = 1; k < j; k++)
+				for(int b = 2; (b*j/k) <= max; b++)
+					if((j*b)%k == 0)
+						distinct[pow_i_j][b] = false;
+		}
+	
+	int count = 0;
+	
+	for(int i = 2; i <= max; i++)
+		for(int j = 2; j <= max; j++)
+			if(distinct[i][j]) count++;
+	
+	return count;
 }
 
 int main(int argc, char **argv) {
-	cout << number_of_distinct_terms(atoi(argv[1])) << endl;
+	cout << count_distinct_terms(atoi(argv[1])) << endl;
 
 	return 0;
 }
