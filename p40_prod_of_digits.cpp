@@ -1,14 +1,18 @@
 #include <iostream>
 #include <cstdlib>
+#include <string>
+#include <algorithm>
 
 using namespace std;
 
-int reverse(int n) {
-	int rev = 0;
+string to_string(int n) {
+	string rev;
 	while(n > 0) {
-		rev = rev*10 + n%10;
+		rev += (n%10 + '0');
 		n /= 10;
 	}
+	reverse(rev.begin(), rev.end());
+	
 	return rev;
 }
 
@@ -24,7 +28,7 @@ int d(int n) {
 		base_digits += (cur_digits*(base_next-base_cur));
 		cur_digits++;
 		base_cur *= 10;
-		base_next *= 100;
+		base_next *= 10;
 	}
 	if(base_digits == n) return 1;
 	cur_digits--;
@@ -37,23 +41,9 @@ int d(int n) {
 	
 	if(remaining_digits%cur_digits == 0) return (the_number-1)%10;
 	
-	the_number = reverse(the_number);
-	int digit = -1;
-	for(int i = remaining_digits%cur_digits; i > 0; i--) {
-		digit = the_number%10;
-		the_number /= 10;
-	}
-	return digit;
-}
-
-string to_string(int n) {
-	string n_str;
-	while(n>0){
-		n_str += n%10;
-		n /= 10;
-	}
-	reverse(n_str.begin(), n_str.end());
-	return n_str;
+	string str_number = to_string(the_number);
+	
+	return (int)(to_string(the_number)[remaining_digits%cur_digits-1]-'0');
 }
 
 int d2(int n) {
@@ -61,7 +51,6 @@ int d2(int n) {
 }
 
 int main(int argc, char **argv) {
-	//cout << d(1)*d(10)*d(100)*d(1000)*d(10000)*d(100000)*d(1000000) << endl;
-	cout << d(atoi(argv[1])) << endl;
+	cout << d(1)*d(10)*d(100)*d(1000)*d(10000)*d(100000)*d(1000000) << endl;
 	return 0;
 }
