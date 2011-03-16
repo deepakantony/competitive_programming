@@ -83,6 +83,7 @@ string to_string(vlong n) {
 		str_n += ((char)(n%10)+'0');
 		n/=10;
 	}
+    reverse(str_n.begin(), str_n.end());
 	return str_n;
 }
 
@@ -96,13 +97,15 @@ void fast_version() {
 	// initialize the queue
 	for(int i = 0; i < 10; i++) // for d0
 		for(int j = 1; j*2 < 1000; j++){ 
-			string n;
+			string n("");
 			if(i == 0) n = "0";
 			n += to_string(i*1000+j*2);
-			if(is_distinct_digits(n)) {
+			if(is_distinct_digits(n) && n.size() == 4) {
 				old_Q.push(n);
 			}
 		}
+    
+    if(old_Q.empty()) return;
 	
 	for(int i = 1; i < n_primes; i++) {
 		while(!old_Q.empty()){
