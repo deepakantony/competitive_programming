@@ -24,10 +24,19 @@ int main(int argc, char **argv) {
   vector<int> P;
   P.push_back(0);
   P.push_back(1);
+  P.push_back(p(2));
 
-  for(int i = 2; i < INT_MAX; i++) {
-    P.push_back(p(i));
-    if(P[i] )
+  for(int i = 2; P[i] < INT_MAX && P[i]-P[i-1] < D; i++) {
+    for(int j = i-1; j > 0 && P[j]-P[i] < D; j--) {
+      if(is_pentagonal(P[i]+P[j]) && is_pentagonal(P[i]-P[j])) {
+	D = P[i]-P[j];
+	_pi = P[i]; _pj = P[j]; _i = i; _j = j;
+	cout << D << endl;
+	return 0; // i need to figure out how to be certain the minimality of this D
+      }
+    }
+    P.push_back(p(i+1));
+  }
 
   cout << D << endl;
   cout << _i << " " << _j << " " << _pi << " " << _pj << endl;
