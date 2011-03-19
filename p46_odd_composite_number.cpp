@@ -31,10 +31,32 @@ vector<vlong> generate_primes(vlong n) {
   return primes;
 }
 
-int main(int argc, char **argv) {
-  vector<vlong> primes = generate_primes(atol(argv[1]));
+bool is_square(vlong n) {
+  double sqrt_n = sqrt(n);
+  return ceil(sqrt_n) == floor(sqrt_n);
+}
 
-  
+bool is_goldbach_comp(vlong n, vector<vlong> &primes) {
+  for(vector<vlong>::const_iterator it = primes.begin(); *it < n; it++) {
+    vlong n_it = n - *it;
+    if(n_it%2) continue;
+    if(is_square(n_it/2)) return true;
+  }
+  return false;
+}
+
+
+int main(int argc, char **argv) {
+  vlong max_size = atol(argv[1]);
+  vector<vlong> primes = generate_primes(max_size);
+
+  for(vlong  i = 9; i < max_size; i+=2) {
+    if(!is_prime(i, primes) && !is_goldbach_comp(i, primes)) {
+      cout << i << endl;
+      break;
+    }
+  }
+      
 
   return 0;
 }
