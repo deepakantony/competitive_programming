@@ -2,8 +2,12 @@
 #include <cstdlib>
 #include <string>
 #include <algorithm>
+#include <cmath>
 
 using namespace std;
+
+// none of these string methods are used at all
+
 
 string to_string(int n) {
   string str_n;
@@ -67,6 +71,7 @@ string multiply(string n, int m) {
 
 string pow_a_b(int a, int b) {
   if(b == 0) return string("1");
+
   string res(to_string(a));
   for(int i = 1; i < b; i++) {
     res = multiply(res, a);
@@ -75,7 +80,7 @@ string pow_a_b(int a, int b) {
   return res;
 }
 
-int main(int argc, char **argv) {
+void slow_version(int argc, char **argv) {
   int limit = atoi(argv[1]);
   string last_10digit_sum;
   for(int i = 0; i < limit; i++) {
@@ -83,6 +88,37 @@ int main(int argc, char **argv) {
   }
   
   cout << last_10digit_sum << endl;
+}
 
+typedef long long unsigned int vlong;
+
+vlong modular_pow(vlong a, vlong b, vlong modulus) {
+  vlong c = 1;
+  for(int i = 0; i < b; i++) {
+    c = (c*a)%modulus;
+  }
+  return c;
+}
+
+vlong pow_vlong(vlong base, vlong exp) {
+  vlong res = 1;
+  for(int i = 0; i < exp; i++) {
+    res *= base;
+  }
+
+  return res;
+}
+
+int main(int argc, char **argv) {
+  vlong modulus = pow_vlong(10,atoi(argv[2]));
+  int limit = atoi(argv[1]);
+
+  vlong sum = 0;
+  for(vlong i = 1; i <= limit; i++) {
+    sum += modular_pow(i, i, modulus);
+  }
+
+  cout << sum%modulus << endl;
   return 0;
 }
+
