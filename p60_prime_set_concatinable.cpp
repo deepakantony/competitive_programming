@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <vector>
 #include <cmath>
-#include <climits>
+#include <limits>
 
 using namespace std;
 
@@ -52,7 +52,29 @@ bool is_concat_prime(int n1, int n2) {
   return(is_prime(concat(n1,n2)) && is_prime(concat(n2,n1)));
 }
 
+bool is_concat_prime(vector<int> vec) {
+  int size = vec.size();
+  for(int i = 0; i < size; i++)
+    for(int j = i+1; j < size; j++)
+      if(!is_concat_prime(vec[i], vec[j])) return false;
+  return true;
+}
 
+int sum(vector<int>::const_iterator start, vector<int>::const_iterator end) {
+  int s = 0;
+  for(vector<int>::const_iterator it = start; start != end; it++)
+    s += *it;
+  return s;
+}
+
+vector<int> concatable_prime(vector<int> primes, int size) {
+  vector<int> res;
+  int smallest_sum = numeric_limits<int>::max();
+  vector<int> cur_set;
+  int cur_sum = sum(cur_set.begin(), cur_set.end());
+
+  while(res.size() < size) {
+    
 
 int main(int argc, char **argv) {
   return 0;
