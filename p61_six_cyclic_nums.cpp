@@ -8,13 +8,34 @@
 
 using namespace std;
 
+template<class T1, class T2>
+ostream& operator<<(ostream& out, const pair<T1,T2> &p) {
+  out << "(" << p.first << ", " << p.second << ")";
+  return out;
+}
+
+template<class T>
+ostream& operator<<(ostream& out, const vector<T> &vec) {
+  if(!vec.empty()) {
+    out << "( ";
+
+    //copy(vec.begin(), vec.end(), ostream_iterator<T>(out, " "));
+
+    for(typename vector< T >::const_iterator it = vec.begin(); 
+	it != vec.end(); it++)
+      out << *it << " ";
+    out << " )";
+  }
+  return out;
+}
+
 int get_polygon_number(int polygon, int n) {
   switch(polygon) {
-  case 3: return ((n*(n+1)) >> 2);
+  case 3: return ((n*(n+1)) >> 1);
   case 4: return n*n;
-  case 5: return ((n*(3*n-1)) >> 2);
+  case 5: return ((n*(3*n-1)) >> 1);
   case 6: return (n*(2*n-1));
-  case 7: return ((n*(5*n-3)) >> 2);
+  case 7: return ((n*(5*n-3)) >> 1);
   case 8: return (n*(3*n-2));
   }
   return 0;
@@ -67,19 +88,33 @@ void generate_polygon_nums_cyclic_pairs(const vector<pair<int,int> > &polygon_nu
   }
 }
 
+bool is_present(int n, const vector<pair<int,int> > &vec) {
+  for(vector<pair<int,int> >::const_iterator it = vec.begin(); it != vec.end(); it++)
+    if(n == it->first) return true;
+
+  return false;
+}
+
 bool update_res(const vector<pair<int,int> > &fwd_cyclic_polygons, 
 		const multimap<pair<int,int>, vector<pair<int,int> > > &cyclic_pairs,
-		vector<int> &res) {
-  if(res.size() == 6 && is_fwd_cyclic_pair(res[res.size()-1], res[0])) return true;
+		vector<pair<int,int> > &res) {
+  if(res.size() == 6
+     && is_fwd_cyclic_pair(res[res.size()-1].second, res[0].second)) 
+    return true;
+
+  if(res.size() > 6) return false;
 
   for(vector<pair<int, int> >::const_iterator it = fwd_cyclic_polygons.begin();
       it != fwd_cyclic_polygons.end(); it++) {
-    res.push_back(it->second);
-    multimap<pair<int,int>, vector<pair<int,int> > >::const_iterator m_it = cyclic_pairs.find(*it);
-    if(m_it != cyclic_pairs.end()) 
-      if( update_res(m_it->second, cyclic_pairs, res))
-	return true;
-      else res.pop_back();
+    if(!is_present(it->first, res)) {
+      res.push_back(*it);
+      multimap<pair<int,int>, vector<pair<int,int> > >::const_iterator m_it = cyclic_pairs.find(*it);
+      cout << res << endl;
+      if(m_it != cyclic_pairs.end()) 
+	if( update_res(m_it->second, cyclic_pairs, res))
+	  return true;
+      res.pop_back();
+    }
   }
 
   return false;
@@ -92,15 +127,21 @@ vector<int> generate_4dig_cyclic_polygon_nums() {
 
   multimap<pair<int,int>, vector<pair<int,int> > > cyclic_pairs;
   generate_polygon_nums_cyclic_pairs(polygon_nums, cyclic_pairs);
-  
-  vector<int> res;
+  //for(multimap<pair<int,int>, vector<pair<int,int> > >::iterator it = cyclic_pairs.begin();
+  //it != cyclic_pairs.end(); it++)
+  //cout << it->first << ": " << it->second << endl;
+
+  vector<pair<int,int> > res;
   for(multimap<pair<int,int>, vector<pair<int,int> > >::iterator it = cyclic_pairs.begin();
       it != cyclic_pairs.end(); it++,res.clear()) {
-    res.push_back(it->first.second);
+    res.push_back(it->first);
     if(update_res(it->second, cyclic_pairs, res)) break;
   }
+  vector<int> result;
+  for(vector<pair<int,int> >::const_iterator it = res.begin(); it != res.end(); it++)
+    result.push_back(it->second);
 
-  return res;
+  return result;
 }
 
 
