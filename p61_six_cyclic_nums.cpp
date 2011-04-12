@@ -3,6 +3,8 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <map>
+#include <utility>
 
 using namespace std;
 
@@ -31,6 +33,76 @@ vector<int> generate_polygon_nums(int min, int max, int polygon) {
 
   return polygon_nums;
 }
+
+
+void generate_polygon_nums(int min, int max, int polygon, vector<pair<int,int> > &polygon_nums) {
+  int i = 1;
+  int n;
+  do {
+    n = get_polygon_number(polygon, i);
+    if(n >= min && n <= max && n%100 > 9)
+      polygon_nums.push_back(pair<int,int>(polygon, n));
+    i++;
+  }while(n < max);
+}
+
+bool is_fwd_cyclic_pair(int n1, int n2) {
+  return (n1%100 == n2/100);
+}
+
+void generate_polygon_nums_cyclic_pairs(const vector<pair<int,int> > &polygon_nums, 
+					multimap<pair<int,int >, vector<pair<int,int> > > &cyclic_pairs) {
+  multimap<pair<int,int >, vector<pair<int,int> > >::iterator m_it = cyclic_pairs.begin();
+  for(vector<pair<int,int> >::const_iterator it = polygon_nums.begin();
+      it != polygon_nums.end(); it++) {
+    vector<pair<int,int> > temp;
+    for(vector<pair<int,int> >::const_iterator it_2 = polygon_nums.begin();
+	it_2 != polygon_nums.end(); it_2++) {
+      if(it->first != it_2->first && is_fwd_cyclic_pair(it->second, it_2->second)) {
+	temp.push_back(*it_2);
+      }
+    }
+    if(!temp.empty())
+      m_it = cyclic_pairs.insert(m_it, pair<pair<int,int >, vector<pair<int,int> > >(*it, temp));
+  }
+}
+
+bool update_res(const vector<pair<int,int> > &fwd_cyclic_polygons, 
+		const multimap<pair<int,int>, vector<pair<int,int> > > &cyclic_pairs,
+		vector<int> &res) {
+  if(res.size() == 6 && is_fwd_cyclic_pair(res[res.size()-1], res[0])) return true;
+
+  for(vector<pair<int, int> >::const_iterator it = fwd_cyclic_polygons.begin();
+      it != fwd_cyclic_polygons.end(); it++) {
+    res.push_back(it->second);
+    multimap<pair<int,int>, vector<pair<int,int> > >::const_iterator m_it = cyclic_pairs.find(*it);
+    if(m_it != cyclic_pairs.end()) 
+      if( update_res(m_it->second, cyclic_pairs, res))
+	return true;
+      else res.pop_back();
+  }
+
+  return false;
+}
+
+vector<int> generate_4dig_cyclic_polygon_nums() {
+  vector<pair<int,int> > polygon_nums;
+  for(int i = 3; i < 9; i++)
+    generate_polygon_nums(1000,9999,i,polygon_nums);
+
+  multimap<pair<int,int>, vector<pair<int,int> > > cyclic_pairs;
+  generate_polygon_nums_cyclic_pairs(polygon_nums, cyclic_pairs);
+  
+  vector<int> res;
+  for(multimap<pair<int,int>, vector<pair<int,int> > >::iterator it = cyclic_pairs.begin();
+      it != cyclic_pairs.end(); it++,res.clear()) {
+    res.push_back(it->first.second);
+    if(update_res(it->second, cyclic_pairs, res)) break;
+  }
+
+  return res;
+}
+
 
 template<class T>
 void quick_sort(T begin, T end) {
@@ -112,13 +184,18 @@ vector<int> get_6_cyclic_4dig_nums() {
   vector<int> heptagonal_nums = generate_polygon_nums(min,max,7);
   vector<int> octagonal_nums = generate_polygon_nums(min,max,8);
 
-  cout << "Triangle nums size: " << triangle_nums.size() << endl;
+  
+
+  /*  cout << "Triangle nums size: " << triangle_nums.size() << endl;
   cout << "Square nums size: " << square_nums.size() << endl;
   cout << "Pentagonal nums size: " << pentagonal_nums.size() << endl;
   cout << "Hexagonal nums size: " << hexagonal_nums.size() << endl;
   cout << "Heptagonal nums size: " << heptagonal_nums.size() << endl;
   cout << "Octagonal nums size: " << octagonal_nums.size() << endl;
 
+
+
+  /*
   typedef vector<int>::const_iterator vec_const_iter;
   for(vec_const_iter it_triangle = triangle_nums.begin(); 
       it_triangle != triangle_nums.end(); it_triangle++)
@@ -146,7 +223,7 @@ vector<int> get_6_cyclic_4dig_nums() {
 		return res;
 	      }
 	    }
-
+  */
   return res;
 }
 
@@ -159,7 +236,7 @@ int sum(T start, T end) {
 }
 
 int main(int argc, char **argv) {
-  vector<int> cyclic_numbers = get_6_cyclic_4dig_nums();
+  vector<int> cyclic_numbers = generate_4dig_cyclic_polygon_nums();
   cout << sum(cyclic_numbers.begin(), cyclic_numbers.end()) << endl;
   copy(cyclic_numbers.begin(), cyclic_numbers.end(), 
        ostream_iterator<int>(cout, " "));
