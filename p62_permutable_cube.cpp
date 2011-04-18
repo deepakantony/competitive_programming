@@ -2,10 +2,78 @@
 #include <cstdlib>
 #include <string>
 #include <cmath>
+#include <vector>
+#include <algorithm>
+#include <iterator>
 
 using namespace std;
 
 typedef long long unsigned int vlong;
+
+int digits(vlong n) {
+  int count = 0;
+  while(n>0) {
+    n/=10;
+    count++;
+  }
+  return count;
+}
+
+bool is_cyclic_equal(vlong n1, vlong n2) {
+  if(digits(n1) != digits(n2)) return false;
+
+  char* n1_digits = (char*)calloc(10, sizeof(char));
+  while(n1 > 0) {
+    n1_digits[n1%10]++;
+    n1 /= 10;
+  }
+
+  char* n2_digits = (char*)calloc(10, sizeof(char));
+  while(n2 > 0) {
+    n2_digits[n2%10]++;
+    n2 /= 10;
+  }
+
+  for(int i = 0; i < 10; i++)
+    if(n1_digits[i] != n2_digits[i]) return false;
+
+  return true;
+}
+
+vector<vlong> permutable_cubes(vector<vlong> &cubes, vlong next_cube) {
+  vector<vlong> res;
+  res.push_back(next_cube);
+  int d_next_cube = digits(next_cube);
+
+  for(vector<vlong>::reverse_iterator it = cubes.rbegin(); 
+      it < cubes.rend() && digits(*it) == d_next_cube; 
+      it++) {
+    if(is_cyclic_equal(next_cube, *it))
+      res.push_back (*it);
+  }
+
+  return res;
+}
+
+int main(int argc, char **argv) {
+  int size = atoi(argv[1]);
+  vector<vlong> cubes;
+  
+  for(vlong i = 1; i < 100000; i++) {
+    vlong next_cube = i*i*i;
+    vector<vlong> perm_cubes = permutable_cubes(cubes, next_cube);
+    if(perm_cubes.size() >= size){
+      cout << "( ";
+      copy(perm_cubes.begin(), perm_cubes.end(), ostream_iterator<vlong>(cout, " "));
+      cout << ")" << endl;
+      cout << *min_element(perm_cubes.begin(), perm_cubes.end()) << endl;
+      return 0;
+    }
+    cubes.push_back(next_cube);
+    //cout << next_cube << endl;
+  }
+  return 0;
+}
 
 vlong to_vlong(string str) {
   vlong n = 0;
@@ -95,7 +163,7 @@ void update_beg_zero(T begin, T end) {
 }
 
 
-int main(int argc, char **argv) {
+int main2(int argc, char **argv) {
   vlong num = atol(argv[1]);
   string s_num = to_string(num);
   cout << "Integer: " << num << endl;
