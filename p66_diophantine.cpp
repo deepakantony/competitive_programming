@@ -52,27 +52,31 @@ bool solve_diophantine(int D, int &x, int &y) {
   int j = 0;
   do {
     for(int i = 2; i < A.size(); i++) {
+      pn = A[i]*pn_1+pn_2;
+      qn = A[i]*qn_1+qn_2;
       pn_2 = pn_1;
       pn_1 = pn;
 
       qn_2 = qn_1;
       qn_1 = qn;
 
-      pn = A[i]*pn_1+pn_2;
-      qn = A[i]*qn_1+qn_2;
     }
 
     if(A.size() > 2 && r%2 == 0) {
-      pn_2 = pn_1; pn_1 = pn;
-      qn_2 = qn_1; qn_1 = qn;
       pn = A[1]*pn_1+pn_2;
       qn = A[1]*qn_1+qn_2;
+      pn_2 = pn_1; pn_1 = pn;
+      qn_2 = qn_1; qn_1 = qn;
     }
 
     j++; 
   } while(j < 2 && r%2 == 0);
 
   x = pn_1; y = qn_1;
+
+  if(A.size() > 2) {
+    x = pn_2; y = qn_2;
+  }
 
   return true;
 }
