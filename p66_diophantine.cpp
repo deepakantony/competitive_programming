@@ -4,10 +4,49 @@
 #include <cmath>
 #include <algorithm>
 #include <iterator>
+#include <string>
 
 using namespace std;
 
-typedef unsigned long long vlong;
+string to_string(int n) {
+  string res;
+  while(n > 0) {
+    res += (n%10);
+    n/=10;
+  }
+  return res;
+}
+
+class vlong {
+public:
+  vlong(){}
+  vlong(int n):_data(to_string(n)) {}
+  vlong(string data) : _data(data) {}
+  vlong(const vlong &n) : _data(n._data) {}
+
+  vlong& operator+=(const vlong &n) { return *this; }
+  vlong& operator+=(const int &n) { return *this += vlong(n); }
+  const vlong operator+(const vlong &n) const { return vlong(*this)+=n; }
+  const vlong operator+(const int &n) const { return vlong(n)+= *this; }
+
+  vlong& operator*=(const vlong &n) { return *this; }
+  vlong& operator*=(const int &n) { return *this *= vlong(n); }
+  const vlong operator*(const vlong &n) const { return vlong(*this)*=n; }
+  const vlong operator*(const int &n) const { return vlong(n)*= *this; }
+
+  bool operator>(const vlong &n) const { return true; }
+  bool operator>(const int &n) const { return *this > vlong(n); }
+
+  friend ostream& operator<<(ostream &out, const vlong &n);
+private:
+  string _data;
+};
+
+ostream& operator<<(ostream &out, const vlong &n) {
+  for(string::const_iterator it = n._data.begin(); it != n._data.end(); it++)
+    out << *it + '0';
+  return out;
+}
 
 bool is_square(int n) {
   double sqrt_n = sqrt((double)n);
@@ -29,7 +68,7 @@ void cf_square_root(int D, vector<int> &A) {
   }while(term2 != A[0] || denom != 1);
 }
 
-bool solve_diophantine(int D, int &x, int &y) {
+bool solve_diophantine(int D, vlong &x, vlong &y) {
   vector<int> A; // continued fraction of square root of D
   cf_square_root(D, A);
 
@@ -62,7 +101,7 @@ bool solve_diophantine(int D, int &x, int &y) {
 
     }
 
-    if(A.size() > 2 && r%2 == 0) {
+    if(A.size() > 2 && r%2 == 0 && j == 0) {
       pn = A[1]*pn_1+pn_2;
       qn = A[1]*qn_1+qn_2;
       pn_2 = pn_1; pn_1 = pn;
@@ -82,14 +121,14 @@ bool solve_diophantine(int D, int &x, int &y) {
 }
 
 int main(int argc, char **argv) {
-  int res_D = 0;
-  int res_x = 0;
+  vlong res_D = 0;
+  vlong res_x = 0;
 
   int limit = atoi(argv[1]);
 
   for(int i = 2; i < limit; i++) {
     if(!is_square(i)) {
-      int x,y;
+      vlong x,y;
       solve_diophantine(i,x,y); // D = i;
       cout << i << " " << x << " " << y << endl;
       if( x > res_x) {
