@@ -20,15 +20,16 @@ bool is_prime(int n) {
   return true;
 }
 
-vector<int> generate_primes(int limit) {
-  vector<int> primes;
+void generate_primes(int limit, vector<int> &primes) {
+  if(limit <= 1) return;
   primes.push_back(2);
+  if(limit <= 2) return;
   primes.push_back(3);
   for(int i = 5; i < limit; i+=6) {
     if(is_prime(i)) primes.push_back(i);
     if(is_prime(i+2)) primes.push_back(i+2);
   }
-  return primes;
+  return;
 }
 
 int reverse(int n) {
@@ -75,6 +76,7 @@ int sum(vector<int>::const_iterator start, vector<int>::const_iterator end) {
   return s;
 }
 
+/*
 struct concat_prime {
   int prime;
   int n_concat;
@@ -146,7 +148,7 @@ concat_prime lowest_concatenable_prime(int size) {
       copy(temp.begin(), temp.end(), back_inserter(primes));
       last_deleted = res.n_concat-2;
     }
-    if(cur_prime.n_concat >= res.n_concat-1)*/
+    if(cur_prime.n_concat >= res.n_concat-1)*
     
     primes.push_back(cur_prime);
   }
@@ -161,5 +163,32 @@ int main(int argc, char **argv) {
   cout << p.prime << " " << p.n_concat << "  " << p.sum << " ( ";
   copy(p.primes.begin(), p.primes.end(), ostream_iterator<int>(cout, " "));
   cout << ") " << endl;
+  return 0;
+}
+*/
+
+void find_concatenable_primes(const vector<int> &primes, int size, vector<int> &concat_primes) {
+  
+}
+
+int main(int argc, char **argv) {
+  if(argc != 3) {
+    cout << "Usage: <program> <number of primes> <largest prime/limit>" << endl;
+    return -1;
+  }
+  int size = atoi(argv[1]);
+  int limit = atoi(argv[2]);
+  
+  vector<int> primes;
+  generate_primes(limit, primes);
+
+  vector<int> concatenable_primes;
+  find_concatenable_primes(primes, size, concatenable_primes);
+
+  cout << "Primes are : ( " << flush;
+  copy(concatenable_primes.begin(), concatenable_primes.end(), ostream_iterator<int>(cout," "));
+  cout << ")" << endl;
+  cout << "Sum : " << sum(concatenable_primes.begin(), concatenable_primes.end()) << endl;
+
   return 0;
 }
