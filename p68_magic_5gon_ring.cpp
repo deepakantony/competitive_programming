@@ -33,17 +33,18 @@ public:
 
 private:
   
-  void generateMagicRings() {
+  void generateMagicRings()
+  {
     vector< vector<int> > numberSums;
     vector<int> curSum;
     // construct the 3 number set that adds up to "sum"
     for(int n = 0; n < max; n++) { // Loop through all numbers
-      for(int secondN = 0; secondN < max; secondN++) {
+      for(int secondN = 0; secondN < max; secondN++){
 	if(n == secondN) continue;
 
 	for(int thirdN = 0; thirdN < max; thirdN++){
 	  if(n == thirdN || secondN == thirdN) continue;
-	  if((n+secondN+thirdN) == sum) {
+	  if((n+secondN+thirdN) == sum){
 	    curSum.push_back(n);
 	    curSum.push_back(secondN);
 	    curSum.push_back(thirdN);
@@ -53,8 +54,6 @@ private:
 	}
       }
     }
-
-    
   }
 
   int max, sum, nDigits;
