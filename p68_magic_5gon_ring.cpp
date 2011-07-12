@@ -9,11 +9,13 @@
 using namespace std;
 
 bool operator>(const string &num1, const string &num2);
+int numOfDigits(int n);
+int numOfDigits(vector<int> vec);
 
 class NGonRing {
 public:
-  NGonRing(int max, int sum, int nDigits):
-    max(max), sum(sum), nDigits(nDigits) {
+  NGonRing(int max, int sum, int nDigits, nGon):
+    max(max), sum(sum), nDigits(nDigits), nGon(nGon) {
     generateMagicRings();
   }
 
@@ -33,32 +35,43 @@ public:
 
 private:
   
-  void generateMagicRings()
-  {
-    vector< vector<int> > numberSums;
-    vector<int> curSum;
-    // construct the 3 number set that adds up to "sum"
-    for(int n = 0; n < max; n++) { // Loop through all numbers
-      for(int secondN = 0; secondN < max; secondN++){
-	if(n == secondN) continue;
+  void generateMagicRings();
 
-	for(int thirdN = 0; thirdN < max; thirdN++){
-	  if(n == thirdN || secondN == thirdN) continue;
-	  if((n+secondN+thirdN) == sum){
-	    curSum.push_back(n);
-	    curSum.push_back(secondN);
-	    curSum.push_back(thirdN);
-	    numberSums.push_back(curSum);
-	    curSum.clear();
-	  }
+  int max, sum, nDigits, nGon;
+  vector<string> magicRings;
+};
+
+
+void NGonRing::generateMagicRings()
+{
+  vector< vector<int> > numberSums;
+  vector<int> curSum;
+  // construct the 3 number set that adds up to "sum"
+  for(int n = 1; n <= max; n++) { // Loop through all numbers
+    for(int secondN = 1; secondN <= max; secondN++){
+      if(n == secondN) continue;
+
+      for(int thirdN = 1; thirdN <= max; thirdN++){
+	if(n == thirdN || secondN == thirdN) continue;
+	if((n+secondN+thirdN) == sum){
+	  curSum.push_back(n);
+	  curSum.push_back(secondN);
+	  curSum.push_back(thirdN);
+	  numberSums.push_back(curSum);
+	  curSum.clear();
 	}
       }
     }
   }
 
-  int max, sum, nDigits;
-  vector<string> magicRings;
-};
+  for(int i = 0; i < numberSums.size(); i++) {
+
+    // NEED TO PERFORM BACKTRACKING HERE
+    for(int j = 0; j < numberSums.size() && n_gon < this->nGon; j++) {
+    
+    }
+}
+
 
 
 bool operator>(const string &num1, const string &num2) {
@@ -87,25 +100,35 @@ ostream& operator<<(ostream &out, const NGonRing& rings) {
 
 int main(int argc, char *argv[]) {
   if(argc != 4) {
-    cout << "Usage: <program> <max_fill_number> <sum_per_row> <num_digits>" 
+    cout << "Usage: <program> <max_fill_number> <num_digits> <n_gon>" 
 	 << endl;
     return -1;
   }
 
-  int maxFillNumber, sumPerRow, numDigits;
+  int maxFillNumber, numDigits, nGon;
   maxFillNumber = atoi(argv[1]);
-  sumPerRow = atoi(argv[2]);
-  numDigits = atoi(argv[3]);
-  
-  if(!maxFillNumber || !sumPerRow || !numDigits) {
+  numDigits = atoi(argv[2]);
+  nGon = atoi(argv[3]);
+
+  if(!maxFillNumber || !numDigits) {
     cout << "All arguments must be integers" << endl;
     return -1;
   }
 
-  NGonRing rings(maxFillNumber, sumPerRow, numDigits);
+  string largestMagicRing;
+  int minSum = (maxFillNumber/2)*3;
+  int maxSum = ((maxFillNumber/2)+1)*3;
+  cout << "Mininum sum: " << minSum << " - Maximum sum: " << maxSum << endl;
+  for(int sumPerRow = minSum; sumPerRow <= maxSum; sumPerRow++) {
+    NGonRing rings(maxFillNumber, sumPerRow, numDigits, nGon);
+    string largest = rings.largestMagicRing();
+    if( largest > largestMagicRing )
+      largestMagicRing = largest;
+    cout << rings << endl;
+  }
 
-  cout << rings << endl;
-  cout << "Largest: " << rings.largestMagicRing() << endl;
+
+  cout << "Largest: " << largestMagicRing << endl;
 
   return 0;
 }
