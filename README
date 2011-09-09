@@ -1,0 +1,10 @@
+Contains all my projecteuler.net solutions.
+
+Update Sep 08 2011
+
+In this project I'm solving the problems from projecteuler.net. The problems 
+from 1 - 67 have been moved to a directory. I'll be putting new solutions into 
+their own folders from now on. Till now using C programming design style (i've 
+used generic functions sometimes though); from now on I'll be trying out object 
+oriented design.
+
