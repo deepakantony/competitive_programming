@@ -3,5 +3,5 @@ PROJECT (NGonRing)
 
 ADD_LIBRARY (NGonRingLib NGonRing.cpp)
 ADD_EXECUTABLE (NGonRing NGonRingMain.cpp)
-LINK_TARGET_LIBRARIES (NGonRing NGonRingLib)
+TARGET_LINK_LIBRARIES (NGonRing NGonRingLib)
 
