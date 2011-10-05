@@ -10,7 +10,8 @@ int main(int argc, char *argv[])
 {
 	if(argc != 3)
 	{
-		cout << "Usage: <program> <sizeOfTheRing> <totalPerLine>" << endl;
+		cout << "Usage: " << argv[0] << " <sizeOfTheRing> <totalPerLine>" 
+			 << endl;
 		return -1;
 	}
 
@@ -19,7 +20,7 @@ int main(int argc, char *argv[])
 
 	// Create a ring and generate solution for the total requested
 	NGonRing theRing(nGon);
-	vector<string> nGonRingSolutions;
+	vector<vector<int> > nGonRingSolutions;
 	theRing.generateSolutions(totalPerLine, nGonRingSolutions);
 
 	// Custom display of solutions
