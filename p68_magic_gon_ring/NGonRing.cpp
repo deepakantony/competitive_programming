@@ -61,7 +61,7 @@ bool NGonRing::generateSolutions(
 			 (! isCyclicWithExisting(possibleSolutions, nGonRingSolutions))
 			)
 		{
-			sortTheSolution( possibleSolutions );
+			rotateTheSolution( possibleSolutions );
 			nGonRingSolutions.push_back( possibleSolutions );
 		}
 	}
@@ -131,17 +131,25 @@ void threeItemSwap(int *index1, int *index2)
 }
 
 //
-// sort the solution such that smallest set is in the beginning
-void NGonRing::sortTheSolution(vector<int> &solution) const
+// rotate the solution such that smallest set is in the beginning
+void NGonRing::rotateTheSolution(vector<int> &solution) const
 {
-	// insertion sort is good enough for this
-	for(int curIndex = 3; curIndex < solution.size(); curIndex+=3)
-	{
-		for(int swapIndex = curIndex-3; 
-			swapIndex >= 0 && solution[swapIndex+3] < solution[swapIndex]; 
+	// find the smallest set
+	int smallestIndex = 0;
+	for(int sIndex = 3; sIndex < solution.size(); sIndex+=3)
+		if(solution[sIndex] < solution[smallestIndex])
+			smallestIndex = sIndex;
+	
+	// if no shifting is required
+	if( smallestIndex == 0 )
+		return;
+
+	for(int sIndex = smallestIndex; sIndex < solution.size(); sIndex += 3)
+		for(int swapIndex = sIndex - 3; swapIndex >= (smallestIndex - sIndex);
 			swapIndex -= 3)
-			threeItemSwap(&solution[swapIndex+3], &solution[swapIndex]);
-	}
+			threeItemSwap(&solution[swapIndex], &solution[sIndex]);
+
+	
 }
 
 //

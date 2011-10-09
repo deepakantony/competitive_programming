@@ -40,8 +40,8 @@ public:
 		const std::vector<std::vector<int> > &nGonRingSolutions
 		) const;
 
-	// sort the solution such that smallest set is in the beginning
-	void sortTheSolution(std::vector<int> &solution) const;
+	// Rotate the solution such that smallest set is in the beginning
+	void rotateTheSolution(std::vector<int> &solution) const;
 
 	// Convert permutation to solution
 	bool convertPermutationToSolution(
