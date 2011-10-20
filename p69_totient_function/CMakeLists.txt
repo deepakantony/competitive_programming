@@ -3,4 +3,4 @@ PROJECT (TotientRatio)
 
 ADD_LIBRARY (TotientLib TotientFunction.cpp)
 ADD_EXECUTABLE (TotientRatio TotientRatioMain.cpp)
-TARGET_LINK_LIBRARY (TotientRatio TotientLib)
+TARGET_LINK_LIBRARIES (TotientRatio TotientLib)
