@@ -78,14 +78,47 @@
 // We can see that we can apply dynamic programming. I need to figure out how 
 // to do this without running out of memory. This problem allows 100x100...x100
 // 10 dimensions; it'll be tricky.
+//
+// I think I've figured something out. If you look at the problem without any
+// boundaries i.e. without anyone falling off, the problem is a polynomial
+// function with N variables and degree M. So, to find the sum of all paths 
+// that you can take in N-dims, we add up all polynomial coefficients for the 
+// equation(x0 + x1 + ... + x2N)^M 
+//
+// Look up pascal's triangle/pyramid/.../M-simplex
+//
+// So the sum would be (2N)^M. Now we do have the constraint that you may fall 
+// off if you're not within the dimensions of the grid. So we need to subtract
+// right amount of values from the total.
+// So, if the initial position is at the corner of a dimension, then one of 
+// your simplex becomes 0 from the beginning. So subtract 2N^(M-1). The power is
+// (m-1) because the size of this simplex is 1 less than the main simplex. 
+// Eg: For a 2-simplex (pascal's triangle)
+//        1
+//      1   0 <- This is the dimension in which there is no movement
+//    1   1   0 <- 2^2 - 2^(2-1) at M = 2
+//  1   2   1   0 <- 2^3 - 2^(3-1) at M = 3 and so on
+//
+// Similarly, for every dimension that becomes the edge after 'k' positions, we 
+// should subtract (2N)^(M-k-1) from (2N)^M
+//
+
 
 #include <iostream>
 
 using namespace std;
 
-#define MODULO_NUM 1000000007
+#define MODULO_NUM 1000000007l
 
-typedef long long unsigned int vlong;
+typedef long long  int vlong;
+
+vlong modPow(vlong base, vlong power, vlong modulus = MODULO_NUM)
+{
+	vlong res = 1;
+	for(vlong i = 0; i < power; i++)
+		res = (res*base)%modulus;
+	return res;
+}
 
 class NDimentionGrid
 {
@@ -93,17 +126,31 @@ public:
 	NDimentionGrid(int *dims, int size) 
 		:N(size) {
 		dimensions = new int[size];
-		totalSize = 1;
 		for(int index = 0; index < size; index++)
 		{
 			dimensions[index] = dims[index];
-			totalSize *= dims[index];
 		}
-		vals = new int[totalSize];
-		for(int i = 0; i < totalSize; i++)
-			vals[i] = 0;
 	}
 
+	vlong gridWalk(int *position, int M) {
+		vlong subVal = 0;
+		for(int i = 0; i < N; i++)
+		{
+			int diff1 = position[i] - 1; // from the 0th index
+			int diff2 = dimensions[i] - position[i];
+			cout << diff1 << " " << diff2 << " " << position[i] << " " << dimensions[i] << endl;
+			if(M > diff1)
+				subVal = (subVal - modPow(2*N, M-diff1-1))%MODULO_NUM;
+			if(M > diff2)
+				subVal = (subVal - modPow(2*N, M-diff2-1))%MODULO_NUM;
+		}
+		cout << modPow(2*N, M) << endl;
+		cout << subVal << endl;
+		cout <<  modPow(2*N, M) - subVal + MODULO_NUM << endl;
+		return (modPow(2*N, M) - subVal)%MODULO_NUM;
+	}
+
+/* Commented out since this is too slow
 	bool isValidPosition(int *position) {
 		for(int index = 0; index < N; index++)
 			if(position[index] < 0 || position[index] > dimensions[index])
@@ -114,7 +161,7 @@ public:
 	// position - current position
 	// M - is the number of steps 
 	// N - number of dimensions
-	vlong gridWalk(int *position, int M) {
+	vlong gridWalkSlowMethod(int *position, int M) {
 //		cout << M << endl;
 		int idx = 0;
 		vlong sizeOfPrev = 1;
@@ -123,8 +170,6 @@ public:
 			idx = (position[index]-1) * sizeOfPrev;
 			sizeOfPrev *= dimensions[index];
 		}
-		if(vals[idx])
-			return vals[idx];
 
 		int totalPaths = 0;
 		if(M == 1) // leaf
@@ -155,9 +200,18 @@ public:
 				}
 			}
 		}
-		vals[idx] = totalPaths%MODULO_NUM;
+		vals[idx] = (vals[idx] + totalPaths%MODULO_NUM)%MODULO_NUM;
 		return vals[idx];
 	}
+	// supplmentts the above slow method
+	int sum() {
+		int s = 0;
+		for(int i = 0; i < totalSize; i++)
+			s = (s+vals[i])%MODULO_NUM;
+		return s;
+	}
+*/
+
 
 	void print() {
 		cout << "Number of dimensions: " << N << endl;
@@ -174,8 +228,8 @@ public:
 private:
 	int *dimensions;
 	int N;
-	int *vals;
-	vlong totalSize;
+//	int *vals;
+//	vlong totalSize;
 };
 
 int main(int argc, char* argv[])
