@@ -64,15 +64,17 @@
 // Some more links for more info on this:
 // http://www.ics.uci.edu/~eppstein/PADS/IntegerPartitions.py
 // 
-// So, now that we have the partition, we need to find the winner. I did a bit
-// cheating here; I got the logic from somewhere. In anycase here's the 
-// description:
+// So, now that we have the partition, we need to find the winner. This is 
+// actually tough, read about sprague-grundy theorem (http://en.wikipedia.org/wiki/Sprague%E2%80%93Grundy_theorem)
+// for more info on determining the winner.
+// 
+// In anycase here's the description for this problem:
 // Every integer's winning posibility is represented as binary number. If 
 // there are 5 partitions of a number 5 bits will represent them. If a 
 // partition wins, that partition will be 1 or else a 0. So for the number 5
 // which has 2 partitions - (3,2) (4,1). we'll have 0 and 1. Since we need
 // to represent this as a binary number and we'll use the smallest integer
-// not present in the output of the partitions i.e. 2 in the above case which
+// not present in the output of the partitions (mex) i.e. 2 in the above case which
 // represents '10'. So next number, 6 has 3 partitions (5,1), (4,2) & (3,2,1);
 // the output is 2, 0, and 1. This will be smallest integer greater than the
 // output, which is 3 = '011' representing 1 loss and 2 wins. While the 
