@@ -140,14 +140,15 @@ public:
 			int diff2 = dimensions[i] - position[i];
 			cout << diff1 << " " << diff2 << " " << position[i] << " " << dimensions[i] << endl;
 			if(M > diff1)
-				subVal = (subVal - modPow(2*N, M-diff1-1))%MODULO_NUM;
+				subVal = (subVal + modPow(2*N, M-diff1-1))%MODULO_NUM;
 			if(M > diff2)
-				subVal = (subVal - modPow(2*N, M-diff2-1))%MODULO_NUM;
+				subVal = (subVal + modPow(2*N, M-diff2-1))%MODULO_NUM;
 		}
 		cout << modPow(2*N, M) << endl;
 		cout << subVal << endl;
+		cout << (-subVal)%MODULO_NUM << endl;
 		cout <<  modPow(2*N, M) - subVal + MODULO_NUM << endl;
-		return (modPow(2*N, M) - subVal)%MODULO_NUM;
+		return (modPow(2*N, M) + ((-subVal)%MODULO_NUM))%MODULO_NUM;
 	}
 
 /* Commented out since this is too slow
