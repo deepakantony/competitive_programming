@@ -178,9 +178,11 @@ bool nextPartition(vector<int> &partition)
 	// * find the right most number greater than 1 in the partition list
 	// * subtract 1 from it
 	// * keeping the descending order intact, try to compress rest of the 
-	//   numbers 
+xc	//   numbers 
 	// * if you can't then find the next number greater than 1 in the partition
 	//   list
+
+	
 }
 
 vlong countLuckyNumbers(vlong A, vlong B, const vector<int> primeVec)
