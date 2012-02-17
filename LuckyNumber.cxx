@@ -23,12 +23,25 @@
 // For the second case, the only lucky number is 120.
 //
 
+//
+// Here's an idea of how this could be done in shorter time
+// * loop through all primes that are less than or equals 17*(9^2)
+// * for each primes we calculate partitions 
+//        * A partition can only have digits
+//        * So now, we have set which we can permute, insert 0's and constrain it
+//          to be within A and B
+// * The total of these will give us the answer
+
+
 #include <iostream>
 #include <string>
 
 using namespace std;
 
 #define MAX_SUM_OF_SQUARES 1459 // (18 * 9 * 9) + 1
+#define MAX_SUM_OF_DIGITS 163 // (18 * 9) + 1
+
+typedef unsigned long long vlong;
 
 int primes[MAX_SUM_OF_SQUARES+1];
 
@@ -56,6 +69,17 @@ void initPrimes()
 bool isPrime(int num)
 {
 	return (num <= MAX_SUM_OF_SQUARES && primes[num] == 1)?true:false;
+}
+
+void buildPrimeVector(vector<int> &primeVec)
+{
+	primeVec.clear();
+	primeVec.push_back(2);
+	for(int num = 3; num < MAX_SUM_OF_DIGITS; num+=2)
+	{
+		if(isPrime(num))
+			primeVec.push_back(num);
+	}
 }
 
 class BigNum
@@ -136,32 +160,61 @@ public:
 	}
 };
 
+
+int sumOfSquares(const vector<int> &vec)
+{
+	int sum = 0;
+	for(auto num: vec)
+	{
+		sum += num * num;
+	}
+	return sum;
+}
+
+bool nextPartition(vector<int> &partition)
+{
+	// partition algorithm is as follows (produces partitions in 
+	// lexicographically descending order
+	// * find the right most number greater than 1 in the partition list
+	// * subtract 1 from it
+	// * keeping the descending order intact, try to compress rest of the 
+	//   numbers 
+	// * if you can't then find the next number greater than 1 in the partition
+	//   list
+}
+
+vlong countLuckyNumbers(vlong A, vlong B, const vector<int> primeVec)
+{
+	vlong count = 0;
+	for(auto prime: primeVec)
+	{
+		vector<int> partition;
+		partition.push_back(prime);
+		while(nextPartition(partition))
+		{
+			if( sumOfSquares(partition) == prime )
+			{
+				count += countNumberOfPermutations(partition, A, B);
+			}
+		}
+	}
+	return count;
+}
+
 int main(int argc, char *argv[])
 {
 	initPrimes();
+	vector<int> primeVec;
+	buildPrimeVector(primeVec);
 	int nTests;
 	cin >> nTests;
-	string strA, strB;
-	int luckyNums = 0;
+	vlong A, B;
+
 	int sum, squareSum;
 	for(int index = 0; index < nTests; index++)
 	{
-		cin >> strA;
-		BigNum A(strA);
-
-		cin >> strB;
-		BigNum B(strB);
-
-		luckyNums = 0;
-		while( A <= B) {
-			if (A.isLucky()) 
-			{
-				luckyNums++;
-			}
-			++A;
-		}
-
-		cout << luckyNums << endl;
+		cin >> A >> B;
+		cout << countLuckyNumbers(A, B, primeVec) << endl;
 	}
 
 	return 0;
