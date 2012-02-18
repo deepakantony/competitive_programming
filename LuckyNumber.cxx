@@ -35,6 +35,10 @@
 
 #include <iostream>
 #include <string>
+#include <algorithm>
+#include <vector>
+#include <numeric>
+#include <list>
 
 using namespace std;
 
@@ -171,30 +175,200 @@ int sumOfSquares(const vector<int> &vec)
 	return sum;
 }
 
-bool nextPartition(vector<int> &partition)
+
+int sumOfDigits(vlong num)
+{
+	int sum = 0;
+	while(num > 0)
+	{
+		sum += num%10;
+		num /= 10;
+	}
+	return sum;
+}
+
+bool isNonDigit(int num)
+{
+	return (num < 0 && num > 9);
+}
+
+int numOfDigits(vlong num)
+{
+	int count = 0;
+	while(num > 0)
+	{
+		count++;
+		num /= 10;
+	}
+	return count;
+}
+
+bool isPartitionValid(const vector<int> &partition,
+					  const vlong &lLimit,
+					  const vlong &uLimit)
+{
+	if( find_if(partition.begin(), partition.end(), isNonDigit) != 
+		partition.end() )
+		return false;
+
+	if(partition.size() > uLimit)
+		return false;
+
+	return true;
+}
+
+bool nextPartition(vector<int> &partition, 
+				   const vlong &lLimit,
+				   const vlong &uLimit)
 {
 	// partition algorithm is as follows (produces partitions in 
 	// lexicographically descending order
 	// * find the right most number greater than 1 in the partition list
 	// * subtract 1 from it
 	// * keeping the descending order intact, try to compress rest of the 
-xc	//   numbers 
+	//   numbers 
 	// * if you can't then find the next number greater than 1 in the partition
 	//   list
+	auto currentItem = partition.end();
+	for(auto it = partition.begin(); it != partition.end(); ++it)
+		if(*it > 1)
+			currentItem = it;
 
-	
+	while(currentItem != partition.end())
+	{
+		vector<int> newPartition;
+		copy(partition.begin(), currentItem-1, back_inserter(newPartition));
+		newPartition.push_back(*currentItem - 1);
+		int restOfTheNumbers = 1; // start with the subtracted 1
+		accumulate(currentItem + 1, partition.end(), restOfTheNumbers);
+
+		while(restOfTheNumbers > 1)
+		{
+			if(restOfTheNumbers >= *currentItem - 1)
+			{
+				newPartition.push_back(*currentItem - 1);
+				restOfTheNumbers -= *currentItem - 1;
+			}
+			else
+			{
+				newPartition.push_back(restOfTheNumbers);
+				restOfTheNumbers = 0;
+			}
+		}
+
+		// validity is defined newPartition
+		if(find_if(newPartition.begin(), newPartition.end(), isNonDigit) == 
+		   newPartition.end())
+		{ // not valid
+			--currentItem;
+		}
+		if( isPartitionValid(newPartition, lLimit, uLimit) )
+		{ // valid
+			partition.clear();
+			copy(newPartition.cbegin(), newPartition.cend(),
+				 back_inserter(partition));
+			return true; // The only time we return true
+		}
+		else --currentItem;
+	}
+
+	return false;
 }
+
+
+vlong getNumber(const list<int> &digList)
+{
+	vlong num = 0;
+	for(auto dig : digList)
+		num = num*10 + dig;
+	return num;
+}
+
+bool permutationNotLargeEnough(const list<int> &perm, vlong A)
+{
+	vlong num = getNumber(perm);
+	return A > num;
+}
+
+bool permutationNotSmallEnough(const list<int> &perm, vlong B)
+{
+	vlong num = getNumber(perm);
+	return B < num;
+}
+
+bool constructMinimumSortedPartition(list<int> &partition, vlong A, vlong B)
+{
+	int Asize = numOfDigits(A);
+	if( partition.size() < Asize )
+	{
+		int diff = Asize - partition.size();
+		int front = partition.back();
+		partition.pop_back();
+		for(int i = 0; i < diff; i++)
+			partition.push_back(0);
+
+		partition.sort();
+		// put the smallest at the front of the list
+		partition.push_front(front);
+	}
+	else
+	{
+		partition.sort();
+	}
+
+	while(permutationNotLargeEnough(partition, A))
+		next_permutation(partition.begin(), partition.end());
+
+	int Bsize = numOfDigits(B);
+	if(partition.size() < Bsize)
+	{
+		int diff = Bsize - partition.size();
+		for(int i = 0; i < diff; i++)
+			partition.push_front(0);
+	}
+
+	vlong num = getNumber(partition);
+	if(num >= A && num <= B)
+		return true;
+	else
+		return false;
+}
+
+vlong countNumberOfPermutations(const vector<int> &partition, vlong A, vlong B)
+{
+	vlong count = 0;
+
+	list<int> copyPartition(partition.begin(), partition.end());
+
+	int Asize = numOfDigits(A);
+
+	if(constructMinimumSortedPartition(copyPartition, A, B))
+			count++;
+
+	while(next_permutation(copyPartition.begin(), copyPartition.end()))
+	{
+		if(permutationNotSmallEnough(copyPartition, B))
+			break;
+		else
+			++count;
+	}
+
+	return count;
+}
+
 
 vlong countLuckyNumbers(vlong A, vlong B, const vector<int> primeVec)
 {
 	vlong count = 0;
+	int Asum = sumOfDigits(A);
+	int Bsum = sumOfDigits(B);
 	for(auto prime: primeVec)
 	{
 		vector<int> partition;
 		partition.push_back(prime);
-		while(nextPartition(partition))
+		while(nextPartition(partition, A, B))
 		{
-			if( sumOfSquares(partition) == prime )
+			if( isPrime(sumOfSquares(partition)) )
 			{
 				count += countNumberOfPermutations(partition, A, B);
 			}
