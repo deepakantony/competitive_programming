@@ -39,6 +39,7 @@
 #include <vector>
 #include <numeric>
 #include <list>
+#include <iterator>
 
 using namespace std;
 
@@ -48,6 +49,15 @@ using namespace std;
 typedef unsigned long long vlong;
 
 int primes[MAX_SUM_OF_SQUARES+1];
+
+
+template<typename T>
+void printContainer(T container)
+{
+	cout << "( ";
+	copy(container.begin(), container.end(), ostream_iterator<int>(cout, ","));
+	cout << " )" << endl;
+}
 
 void initPrimes()
 {
@@ -189,7 +199,7 @@ int sumOfDigits(vlong num)
 
 bool isNonDigit(int num)
 {
-	return (num < 0 && num > 9);
+	return (num < 0 || num > 9);
 }
 
 int numOfDigits(vlong num)
@@ -211,7 +221,7 @@ bool isPartitionValid(const vector<int> &partition,
 		partition.end() )
 		return false;
 
-	if(partition.size() > uLimit)
+	if(partition.size() > numOfDigits(uLimit))
 		return false;
 
 	return true;
@@ -238,16 +248,23 @@ bool nextPartition(vector<int> &partition,
 	{
 		vector<int> newPartition;
 		copy(partition.begin(), currentItem-1, back_inserter(newPartition));
-		newPartition.push_back(*currentItem - 1);
+//		newPartition.push_back(*currentItem - 1);
 		int restOfTheNumbers = 1; // start with the subtracted 1
+		int currentNumber = *currentItem - 1;
+		if(currentNumber > 9)
+		{
+			restOfTheNumbers += currentNumber - 9;
+			currentNumber = 9;
+		}
+		newPartition.push_back(currentNumber);
 		accumulate(currentItem + 1, partition.end(), restOfTheNumbers);
 
-		while(restOfTheNumbers > 1)
+		while(restOfTheNumbers > 0)
 		{
-			if(restOfTheNumbers >= *currentItem - 1)
+			if(restOfTheNumbers >= currentNumber)
 			{
-				newPartition.push_back(*currentItem - 1);
-				restOfTheNumbers -= *currentItem - 1;
+				newPartition.push_back(currentNumber);
+				restOfTheNumbers -= currentNumber;
 			}
 			else
 			{
@@ -255,17 +272,12 @@ bool nextPartition(vector<int> &partition,
 				restOfTheNumbers = 0;
 			}
 		}
+		printContainer(newPartition);
 
-		// validity is defined newPartition
-		if(find_if(newPartition.begin(), newPartition.end(), isNonDigit) == 
-		   newPartition.end())
-		{ // not valid
-			--currentItem;
-		}
 		if( isPartitionValid(newPartition, lLimit, uLimit) )
 		{ // valid
 			partition.clear();
-			copy(newPartition.cbegin(), newPartition.cend(),
+			copy(newPartition.begin(), newPartition.end(),
 				 back_inserter(partition));
 			return true; // The only time we return true
 		}
@@ -368,9 +380,13 @@ vlong countLuckyNumbers(vlong A, vlong B, const vector<int> primeVec)
 		partition.push_back(prime);
 		while(nextPartition(partition, A, B))
 		{
+//			cout << partition.size() << " ";
+//			printContainer(partition);
 			if( isPrime(sumOfSquares(partition)) )
 			{
 				count += countNumberOfPermutations(partition, A, B);
+				printContainer(partition);
+				cout << "countLuckyNumbers: " << count << endl;
 			}
 		}
 	}
