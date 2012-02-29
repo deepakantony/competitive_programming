@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <cassert>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -12,9 +14,13 @@ ullong binaryToULLong(iterator_type begin, iterator_type end)
 {
 	ullong res = 0;
 	int index = 0;
-	for(iterator_type it = begin; it != end; ++it, ++index)
-		if(*it == '1')
-			res |= (1 << index);
+	for(iterator_type it = begin; it != end; ++it, ++index) 
+	{
+		if(*it == '1') 
+		{
+			res |= (1ull << index);
+		}
+	}
 
 	if(index > 64)
 		throw "More than 63 bits getting extracted.";
@@ -23,19 +29,35 @@ ullong binaryToULLong(iterator_type begin, iterator_type end)
 			
 }
 
+string ullongToString(ullong n)
+{
+	string res;
+	for(int digit = 0; digit < 64; ++digit)
+	{
+		if(n > 0) {
+			res += '0' + n%2;
+			n /= 2;
+		}
+		else res += '0';
+	}
+	reverse(res.begin(), res.end());
+	return res;
+}
+
 class LongLongSumData
 {
 public:
-	LongLongSumData(ullong dataA, ullong dataB) 
-		: _dataA(dataA), _dataB(dataB), _modified(false) {}
-
-	const int& operator[](int bitIndex) const {
-		if ( _dataA & ( 1 << bitIndex ) > 0 )
-			return 1;
+	LongLongSumData(ullong dataA, ullong dataB, int prevCarryOver = 0) 
+		: _dataA(dataA), _dataB(dataB), _sum(dataA+dataB), 
+		  _modified(false), _prevCarryOver(prevCarryOver) {
+		updateCarry();
 	}
 
-	bool hasChanged() const {
-		return _modified;
+	const int operator[](int bitIndex) const {
+		if ( (_sum & ( 1ull << bitIndex )) > 0 )
+			return 1;
+		else
+			return 0;
 	}
 
 	bool changeBitA(int bitIndex, int val) {
@@ -46,14 +68,21 @@ public:
 		return changeBit(_dataB, bitIndex, val);
 	}
 
-	void updateSum() {
-		_sum = _dataA + _dataB;
-		updateCarry();
+	bool updateSum(int carry = 0) {
+		_prevCarryOver = carry;
+		return updateSumAndModifiedFields();
+	}
+
+	bool hasModified() const {
+		return _modified;
+	}
+
+	void clearModified() {
 		_modified = false;
 	}
 
 	int carry() {
-		reutn _carry;
+		return _carry;
 	}
 
 private: // functions
@@ -66,12 +95,12 @@ private: // functions
 		return updateSumAndModifiedFields();
 	}
 
-	bool updateSumAndModifiedFields(int carry = 0) {
+	bool updateSumAndModifiedFields() {
 		bool prevLastBit = _carry;
-		_sum = _dataA + _dataB;
+		_sum = _dataA + _dataB + _prevCarryOver;
 		updateCarry();
 		if(!_modified)
-			_modified = (prevLastBit != curLastBit) ? true : false;
+			_modified = (prevLastBit != _carry) ? true : false;
 		return _modified;
 	}
 
@@ -79,9 +108,7 @@ private: // functions
 		_carry = (1ull << 63) & _sum ? true : false;
 	}
 
-	ullong binaryToULLong(const string &binary, int fromIndex, int nextIndex) {
-		
-	}
+	friend void unitTests();
 
 private: // members
 	ullong _dataA;
@@ -89,6 +116,7 @@ private: // members
 	ullong _sum;
 	int _carry;
 	bool _modified;
+	int _prevCarryOver;
 };
 
 class TwoNBitBinaryNumbers
@@ -103,7 +131,7 @@ public:
 		{
 			ullong A = binaryToULLong(itA, itA+63);
 			ullong B = binaryToULLong(itB, itB+63);
-			_NBit.push_back(LongLongData(A, B));
+			_NBit.push_back(LongLongSumData(A, B));
 		}
 	}
 
@@ -111,25 +139,40 @@ public:
 		
 	}
 private:
-	vector<LongLongData> _NBit;
+	vector<LongLongSumData> _NBit;
 	bool _modified;
 };
 
 
 
-void unitTestsLongLongDataSum() 
+void unitTests() 
 {
-	LongLongDataSum sumNums(5, 1);
+	LongLongSumData sumNums(5ull, 1ull);
 	assert(sumNums[5] == 0);
 	assert(sumNums[0] == 0);
 	sumNums.changeBitA(0, 0);
 	assert(sumNums[0] == 1);
-	sumNums.changeBitB(0, 0);
+	assert(sumNums.changeBitB(0, 0) == 0);
 	assert(sumNums[0] == 0);
+	sumNums.updateSum(1);
+	assert(sumNums[0] == 1);
+	LongLongSumData sumNums1(-1ull + (1ull << 63), (1ull << 62));
+	assert(sumNums1[63] == 1);
+	assert(sumNums1[62] == 0);
+	sumNums1.updateSum(1);
+	assert(sumNums1[0] == 0);
+	string num15("1111");
+	assert(binaryToULLong(num15.rbegin(), num15.rend()) == 15ull);
+	string num10("1010");
+	assert(binaryToULLong(num10.rbegin(), num10.rend()) == 10ull);
+	string numLarge("1111111111111111111111111111111111111111111111111111111111111111");
+	assert(binaryToULLong(numLarge.rbegin(), numLarge.rend()) == -1ull);
+	string num2n("0100000000000000000000000000000000000000000000000000000000000000");
+	assert(binaryToULLong(num2n.rbegin(), num2n.rend()) == (1ull << 62));
 }
 
 int main(int argc, char *argv[])
 {
-	
+	unitTests();
 	return 0;
 }
