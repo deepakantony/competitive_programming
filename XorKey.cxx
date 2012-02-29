@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cassert>
 
 using namespace std;
 
@@ -29,17 +30,29 @@ string decToBinary(ushort n)
 	return binary;
 }
 
+
+
+
+void unitTest()
+{
+	// flipShort function
+	ushort ten = 10, three = 3, two =2, four = 4;
+	assert(flipShort((ushort)10) != ~ten);
+	assert(flipShort(10) == (~ten & (0x7FFF)));
+	assert(flipShort(three) == (ushort)32764);
+
+	// flipBit function
+	assert(flipBit(4, 3) == (ushort)12);
+	assert(flipBit(0, 10) == (ushort)(1<<10));
+
+	// decToBinary functionxs
+	assert(decToBinary(2) == string("0000000000000010"));
+	assert(decToBinary(32764) == string("0111111111111100"));
+}
+
 int main(int argc, char *argv[])
 {
-	ushort N;
-	cin >> N;
-	cout << "N: " << decToBinary(N) << endl;
-	cout << "N flipped: " << flipShort(N) << " is: " 
-		 << decToBinary(flipShort(N)) << endl;
-	cout << "N flip bit 3: " << flipBit(N, 3) << " is: " 
-		 << decToBinary(flipBit(N,3)) << endl;
-	cout << decToBinary((~N) & (1<<3)) << endl;
-	cout << decToBinary(N & (~(1<<3))) << endl;
+	unitTest();
 	return 0;
 }
 			
