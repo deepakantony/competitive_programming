@@ -123,7 +123,7 @@ class TwoNBitBinaryNumbers
 {
 public:
 	TwoNBitBinaryNumbers(const string &numA, const string &numB) 
-		:_modified(false) {
+		:_modified(false), N(numA.size()) {
 		_NBit.clear();
 		for(auto itA = numA.rbegin(), itB = numB.rbegin(); 
 			itA != numB.rend() && itB != numB.rend();
@@ -136,14 +136,28 @@ public:
 	}
 
 	int sumIndex(int bitIndex) {
-		
+		return _NBit[bitIndex/64][bitIndex%64];
 	}
+
+	void changeBitA(int bitIndex, int val) {
+		if(_NBit[bitIndex/64].changeBitA(bitIndex, val))
+		{
+			//TODO
+		}
+	}
+
+	void changeBitB(int bitIndex, int val) {
+		_NBit[bitIndex/64].changeBitB(bitIndex, val);
+	}
+
+	
 private:
+	void update(); // TODO
+
 	vector<LongLongSumData> _NBit;
+	ullong N;
 	bool _modified;
 };
-
-
 
 void unitTests() 
 {
@@ -169,6 +183,8 @@ void unitTests()
 	assert(binaryToULLong(numLarge.rbegin(), numLarge.rend()) == -1ull);
 	string num2n("0100000000000000000000000000000000000000000000000000000000000000");
 	assert(binaryToULLong(num2n.rbegin(), num2n.rend()) == (1ull << 62));
+
+	
 }
 
 int main(int argc, char *argv[])
