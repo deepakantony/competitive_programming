@@ -7,6 +7,92 @@
 
 using namespace std;
 
+// Convert string to char; but normalized (so subtract 'a' from it; start from 1)
+void convertStringToIntChar(const string &str, char *output)
+{
+	output = new char[str.size()];
+	int index = 0;
+	for(auto it = str.begin(); it != str.end(); ++it)
+		output[index++] = *it - 'a' + 1;
+}
+
+// using the source code from the paper: Linear Work suffix array construction
+
+// Lexicographic order for pairs
+template<class pair_type>
+bool leq(pair_type a1, pair_type a2, pair_type b1, pair_type b2)
+{
+	return (a1 < b1 || (a1 == b1 && a2 < b2));
+}
+
+// Lexicographic order for triplets
+template<class triplet_type>
+bool leq(triplet_type a1, triplet_type a2, triplet_type a3,
+		 triplet_type b1, triplet_type b2, triplet_type b3)
+{
+	return (a1 < b1 || (a1 == b1 && leq(a2, a3, b2, b3)));
+}
+
+// Stably sort the an array[0..n-1] to output[0..n-1] using the keys or
+// normalized alphabets within 0..K from sourceArray. We use the 0 for invalid 
+// alphabets, like for extending the string to be a multiple of 0 and etc...
+// In any case 0 should never occur in this sort, since n will always be < 
+// length of the actual string.
+//
+// Lets work through an example - sorting "abdaba" in linear time.
+// sourceArray = {1, 2, 4, 1, 2, 1} // normalized string[i] - 'a' + 1
+// array = {0, 1, 2, 3, 4, 5} // unsorted
+// output = {0, 3, 5, 1, 4, 2} // sorted
+template<class element_type, class index_type>
+void radixPass(index_type *array, index_type *output, 
+			   element_type *sourceArray, index_type n, element_type K)
+{
+	// initialize counter
+	// counter = {0, 0, 0, 0, 0} // assuming K = 4 for only a, b, c and d
+	index_type *counter = new index_type[K+1](0);
+
+	// Count occurences
+	// counter = {0, 3, 2, 0, 1}
+	for(auto index = 0; index < n; ++index)
+		counter[sourceArray[array[index]]]++;
+
+	// exclusive prefix sums; essentially identify the indices that each 
+	// element will start.
+	// counter = {0, 0, 3, 5, 5}, what it means is 'a' will appear at position 0
+	// till 'b' occurs; 'b' will start at position 3 till 'c'; since there is 
+	// no 'c', 'd' will be put at position '5'
+	for(auto index = 0, sum = 0; index <= K; ++index)
+	{
+		auto temp = counter[index];
+		counter = sum;
+		sum += temp;
+	}
+
+	// now put the sorted array back to output
+	// output = {0, 3, 5, 1, 4, 2}
+	for(auto index = 0; index < n; ++index)
+	{
+		output[counter[sourceArray[array[index]]]++] = array[index];
+		// the increments to counter is the way of keeping the counter pointing
+		// rightly to the index where I would assign that element.
+	}
+
+	// release counter
+	delete [] counter;
+}
+
+// Recursively find the suffixArray from the inputArray[0..n-1](normalized string 
+// usually) in [1..K].
+// Requires inputArray[n] = inputArray[n+1] = inputArray[n+2] = 0, for n >= 2
+template<class element_type, class index_type>
+void constructSuffixArray(element_type *inputArray, index_type *suffixArray,
+						  index_type n, element_type K)
+{
+
+}
+
+// 
+
 class SuffixArray
 {
 public:
@@ -202,6 +288,10 @@ void SuffixArray::updateSuffixArray(const string &inpStr)
 {
 	int curIndex = stringList.size();
 	stringList.push_back(inpStr);
+	char *i
+/* // old sequential method
+	int curIndex = stringList.size();
+	stringList.push_back(inpStr);
 	for(int leftIndex = 0; leftIndex < inpStr.size(); ++leftIndex)
 	{
 		SANode newNode(&stringList);
@@ -209,6 +299,7 @@ void SuffixArray::updateSuffixArray(const string &inpStr)
 		newNode.leftIndex = leftIndex;
 		suffixSet.insert(newNode);
 	}
+*/
 }
 
 int SuffixArray::findLCP(const SANode &prev, const SANode &cur) const
@@ -332,7 +423,7 @@ void solveFindStrings()
 		cin >> s;
 		sa.add(s);
 	}
-	sa.updateSubstringVec();
+//	sa.updateSubstringVec();
 	int q;
 	cin >> q;
 	for(int query = 0; query < q; ++query)
