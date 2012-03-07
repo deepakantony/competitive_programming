@@ -33,6 +33,20 @@ bool leq(triplet_type a1, triplet_type a2, triplet_type a3,
 	return (a1 < b1 || (a1 == b1 && leq(a2, a3, b2, b3)));
 }
 
+// triplet equals check
+template<class triplet_type>
+bool tripletEquals(triplet_type a, triplet_type b)
+{
+	return (a[0] == b[0] && a[1] == b[1] && a[2] == b[2]);
+}
+
+// assign a triplet 
+template<class triplet_type>
+void tripletAssign(triplet_type a, triplet_type b)
+{
+	b[0] = a[0]; b[1] = a[1]; b[2] = a[2];
+}
+
 // Stably sort the an array[0..n-1] to output[0..n-1] using the keys or
 // normalized alphabets within 0..K from sourceArray. We use the 0 for invalid 
 // alphabets, like for extending the string to be a multiple of 0 and etc...
@@ -84,14 +98,142 @@ void radixPass(index_type *array, index_type *output,
 // Recursively find the suffixArray from the inputArray[0..n-1](normalized string 
 // usually) in [1..K].
 // Requires inputArray[n] = inputArray[n+1] = inputArray[n+2] = 0, for n >= 2
+//
+// This one is a tough one to follow easily, let me use an example
+// our string = "yabbadabbado"
+// inputArray = { y a b b a d a b b a d  o  } // normalized (inputArray[i] - 'a' + 1
+//                0 1 2 3 4 5 6 7 8 9 10 11
+// so, n = 12, size of input array
+// K = 26, all are english characters
+// expected output:
+// suffixArray= { 6  abbado
+//                1  abbadabbado
+//                4  adabbado
+//                9  ado
+//                3  badabbado
+//                8  bado
+//                2  bbadabbado
+//                7  bbado
+//                5  dabbado
+//                10 do
+//                11 o
+//                0  yabbadabbado }
+//
 template<class element_type, class index_type>
 void constructSuffixArray(element_type *inputArray, index_type *suffixArray,
 						  index_type n, element_type K)
 {
+	// size of n%3 == 0 = n0, n%3 == 1 = n1 and n%3 == 2 = n2
+	// for our case n0 = 4, n1 = 4, n2 = 4, n02 = 8
+	int n0 = (n+2)/3, n1 = (n+1)/3, n2 = n/3, n02 = n0 + n2; 
+	// similarly s0, s1, and s2 are indices pointing to s such that
+	// i%3 == 0 for s0, i%3 == 1 for s1 and i%3 == 2 for s2. 
+	// now create s12, a concatenation of s1 and s2 (note: we can directly 
+	// create s12)
+	int *s12 = new int[n02 + 3]; // s12.size() = 11
+	int *SA12 = new int[n02 + 3]; // SA12.size() = 11
+	s12[n02] = s12[n02+1] = s12[n02+2] = 0; // s12[8,9,10] = 0
+	SA12[n02] = SA12[n02+1] = SA12[n02+2] = 0; // SA12[8,9,10] = 0
+	int *s0 = new int[n0];
+	int *SA0 = new int[n0];
 
+	// Initialize s12, for our example s12 = [ 1 2 4 5 7 8 10 11 0 0 0 ]
+	// so s12 is { [abb][ada][bba][do0][bba][dab][bad][o00] } not in the 
+	// right order, but you get the idea
+	for(auto index = 0, indexS12 = 0; index < n + (n0 - n1); ++index)
+		if( index%3 != 0)
+			s12[indexS12++] = index; 
+
+	// Sort the triplets
+	// For our example...
+	radixPass(s12, SA12, inputArray + 2, n02, K);
+	// in the first radix pass i'm comparing s12 = { 1 2 4 5 7 8 10 11 } + 2
+	// { 3 4 6 7 9 10 12 13 } is the actual indices in inputArray that is 
+	// compared. the alphabets compared are { b a a b a d 0 0 }
+	// SA12 = { 12 13 4 6 9 3 7 10 } - 2 = { 10 11 2 4 7 1 5 8 } 
+	radixPass(SA12, s12, inputArray + 1, n02, K);
+	// second radix pass we're comparing SA12 + 1 = { 11 12 3 5 8 2 6 9 }
+	// the alphabets compared are { o 0 b d b b a a }
+	// so s12 = { 12 6 9 3 8 2 5 11 } - 1 = { 11 5 8 2 7 1 4 10 }
+	radixPass(s12, SA12, inputArray, n02, K);
+	// third radix pass we're comparing s12 = { 11 5 8 2 7 1 4 10 }
+	// the alphabets compared are { o d b b b a a d }
+	// so SA12 = { 1 4 8 2 7 5 10 11 }
+	// i.e. SA12 = { [abb][ada][bad][bba][bba][dab][do0][o00] }
+
+	// find lexicographic names of triples
+	// So at the end of this loop name = 7, since there is duplicate
+	// triplet [bba]
+	int name = 0;
+	element_type *prev = new element_type[3](-1);
+	for(auto index = 0; index < n02; index++)
+	{
+		if( ! tripletEquals(prev, inputArray+index) )
+		{
+			name++;
+			tripletAssign(inputArray+index, prev);
+		}
+		if( SA12[index] % 3 == 1 )
+			s12[SA12[index]/3] = name; // left half
+		else
+			s12[SA12[index]/3 + n0] = name; // right half
+		// at the end of the loop our examples s12 will be
+		// { 1 2 4 6 3 4 5 7 }
+	}
+
+	// recurse if names are not unique
+	if ( name < n02) // for our example this is true
+	{
+		// So, we're finding suffix array of {1 2 4 6 3 4 5 7}
+		//                                    0 1 2 3 4 5 6 7
+		// after this recursion the SA12 = [ 0 1 4 5 2 6 3 7 ]
+		constructSuffixArray(s12, SA12, n02, name);
+		// store unique names in s12 using the suffix array
+		for(int index = 0; index < n02; ++index)
+			s12[SA12[i]] = i + 1;
+		// our s12 will be s12 = [1 2 5 7 3 4 6 8 
+		//                        0 1 2 3 4 5 6 7
+	}
+	else
+	{ // generate the suffix array of s12 directly
+		for(int index = 0; index < n02; ++index)
+			SA12[s12[index] - 1] = i;
+	}
+
+	// stably sort mod 0 suffixes from SA12 by their first character
+	// for our example s0 = [ 0 3 6 9 ] = [ y b a a ]
+	for(auto index = 0, indexS0 = 0; index < n02; ++index)
+		if(SA12[index] < n0)
+			s0[indexS0++] = 3*SA12[index];
+	// after the radix pass SA0 = [ 6 9 3 0 ]
+	radixPass(s0, SA0, inputArray, n0, K);
+
+	// merge sorted SA0 suffixes and sorted SA12 suffixes
+	  for (int p=0,  t=n0-n1,  k=0;  k < n;  k++) {
+#define GetI() (SA12[t] < n0 ? SA12[t] * 3 + 1 : (SA12[t] - n0) * 3 + 2)
+    int i = GetI(); // pos of current offset 12 suffix
+    int j = SA0[p]; // pos of current offset 0  suffix
+    if (SA12[t] < n0 ? 
+        leq(s[i],       s12[SA12[t] + n0], s[j],       s12[j/3]) :
+        leq(s[i],s[i+1],s12[SA12[t]-n0+1], s[j],s[j+1],s12[j/3+n0]))
+    { // suffix from SA12 is smaller
+      SA[k] = i;  t++;
+      if (t == n02) { // done --- only SA0 suffixes left
+        for (k++;  p < n0;  p++, k++) SA[k] = SA0[p];
+      }
+    } else { 
+      SA[k] = j;  p++; 
+      if (p == n0)  { // done --- only SA12 suffixes left
+        for (k++;  t < n02;  t++, k++) SA[k] = GetI(); 
+      }
+    }  
+  }
+
+	delete [] s12;
+	delete [] SA12;
+	delete [] SA0;
+	delete [] s0;
 }
-
-// 
 
 class SuffixArray
 {
@@ -288,7 +430,7 @@ void SuffixArray::updateSuffixArray(const string &inpStr)
 {
 	int curIndex = stringList.size();
 	stringList.push_back(inpStr);
-	char *i
+	
 /* // old sequential method
 	int curIndex = stringList.size();
 	stringList.push_back(inpStr);
