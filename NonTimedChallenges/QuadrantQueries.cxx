@@ -46,8 +46,8 @@ struct Point {
 		quadrantInfo = new int[4];
 		findQuadrandInfo(x, y, quadrantInfo);
 	}
-	void reflectX() { y = -y; reflectQX(quadrantInfo); }
-	void reflectY() { x = -x; reflectQY(quadrantInfo); }
+	void reflectX() { reflectQX(quadrantInfo); }
+	void reflectY() { reflectQY(quadrantInfo); }
 	int x, y; 
 	int *quadrantInfo;
 };
@@ -61,29 +61,33 @@ void printPointVec(const vector<Point> &v) {
 struct INode 
 {
 	int low, high, mid; // intervals inclusive
-	INode *left, *right, *parent;
-	bool updated;
+	INode *left, *right;
 	int *result;
 };
 
 struct ITree
 {
 	ITree(vector<Point> &_pointData) : pointData(_pointData) { 
-		root = constructITree(0, pointData.size()-1, 0); 
+		root = constructITree(0, pointData.size()-1); 
+		resetUpdateLowHigh();
 	}
-	INode* constructITree(int low, int high, INode *parent) {
+
+	void resetUpdateLowHigh() {
+		updateLow = pointData.size();
+		updateHigh = -1;
+		updated = false;
+	}
+
+	INode* constructITree(int low, int high) {
 		INode *cur = new INode;
 		cur->low = low; cur->high = high;
 		cur->mid = (low+high)/2;
 		cur->left = cur->right = 0;
-		cur->parent = parent;
-		cur->updated = true;
-
 		if(cur->low == cur->high)
 			cur->result = pointData[cur->low].quadrantInfo;
 		else {
-			cur->left = constructITree(low, cur->mid, cur);
-			cur->right = constructITree(cur->mid + 1, high, cur);
+			cur->left = constructITree(cur->low, cur->mid);
+			cur->right = constructITree(cur->mid + 1, cur->high);
 			cur->result = new int[4];
 			add(cur->left->result, cur->right->result, cur->result);
 		}
@@ -91,34 +95,25 @@ struct ITree
 	}
 	void getQuadrantInfo(int i, int j, int *qInfo) {
 		fill(qInfo, qInfo+4, 0);
-		getInfo(i, j, qInfo);
-	}
-
-	void getInfo(int i, int j, int *qInfo) {
-		if(!root) return;
-		
-		vector<INode*> stack;
-		stack.push_back(root);
-
-		while(stack.size() > 0) {
-			INode *cur = stack.back();
-			stack.pop_back();
-			if(cur->low >= i && cur->high <= j)
-				add(cur->result, qInfo);
-			else {
-				if(i > cur->mid) 
-					stack.push_back(cur->right);
-				else if(j <= cur->mid)
-					stack.push_back(cur->left);
-				else {
-					stack.push_back(cur->right);
-					stack.push_back(cur->left);
-				}
-			}
+		if(i<j && updated) {
+			int curI = i, curJ = j;
+			if(i <= updateLow)
+				curI = updateLow;
+			if(j >= updateHigh)
+				curJ = updateHigh;
+			update(root, curI, curJ);
 		}
+		if(updated) {
+			if(i <= updateLow)
+				if (j >= updateHigh) resetUpdateLowHigh(); else updateLow = j;
+			else if (j >= updateHigh)
+				updateHigh = i;
+		}
+
+		getInfo(root, i, j, qInfo);
 	}
 
-	void getInfo(INode *cur, const int &i, const int &j, int *qInfo) {
+	void getInfo(INode *cur, int i, int j, int *qInfo) {
 		if(!cur) return;
 
 		if(cur->low == i && cur->high == j) {
@@ -129,18 +124,22 @@ struct ITree
 		if(i > cur->mid) return getInfo(cur->right, i, j, qInfo);
 		if(j <= cur->mid) return getInfo(cur->left, i, j, qInfo);
 		
-		getInfo(cur->right, cur->mid+1, j, qInfo);
+		getInfo(cur->right,cur->mid+1, j, qInfo);
 		getInfo(cur->left, i, cur->mid, qInfo);
 	}
 
 	void reflectX(int i, int j) {
 		XorY = 1;
-		reflect(root, i, j);
+		if(i<updateLow) { updateLow = i; updated = true; }
+		if(j>updateHigh) { updateHigh = j; updated = true; }
+		fastreflect(i, j);
 	}
 
 	void reflectY(int i, int j) {
 		XorY = 0;
-		reflect(root, i, j);
+		if(i<updateLow) { updateLow = i; updated = true; }
+		if(j>updateHigh) { updateHigh = j; updated = true; }
+		fastreflect(i, j);
 	}
 
 	void ref(Point *p) {
@@ -149,34 +148,16 @@ struct ITree
 		else
 			p->reflectY();
 	}
-/*
-	void reflect(int i, int j) {
-		if(!root) return;
-		vector<INode*> stack;
-		root->updated = false;
-		stack.push_back(root);
-		while(stack.size() > 0) {
-			INode *cur = stack.back();
-			if(cur->low == cur->high) {
-				stack.pop_back();
-				ref(&pointData[cur->low]);
-				cur->updated = true;
-			}
-			else {
-				if(i > cur->mid) {
-					cur->right->updated = false;
-					stack.push_back(cur->right);
-				}
-				else if(j <= cur->mid) {
-					cur->left->updated = false;
-					stack.push_back(cur->left);
-				}
-				else if(
-			}
-		}
-		}*/
+
+	void ref(int *q) { // quadrant
+		if( XorY )
+			reflectQX(q);
+		else
+			reflectQY(q);
+	}
 
 	void reflect(INode* cur, int i, int j) {
+
 		if(!cur) return;
 		if(cur->low == cur->high) { 
 			ref(&pointData[cur->low]); return; 
@@ -191,9 +172,44 @@ struct ITree
 		add(cur->left->result, cur->right->result, cur->result);
 	}
 
+	void fastreflect(int i, int j) {
+		for(int index = i; index <= j; index++)
+			ref(&pointData[index]);
+	}
+
+	void update(INode* cur, int i, int j) {
+		if(!cur || cur->low == cur->high) return;
+
+		if(cur->low + 1 == cur->high) {
+			add(cur->left->result, cur->right->result, cur->result);
+			return;
+		}			
+
+		else if(i > cur->mid) update(cur->right, i, j);
+		else if(j <= cur->mid) update(cur->left, i, j);
+		else {
+			update(cur->right, cur->mid+1, j);
+			update(cur->left, i, cur->mid);
+		}
+		add(cur->left->result, cur->right->result, cur->result);
+	}
+	
+	void swapUpdate(INode *cur) {
+		if(cur->low == cur->high) return;
+		if(cur->low+1 == cur->high) {
+			ref(cur->result);
+			return;
+		}
+		swapUpdate(cur->left);
+		swapUpdate(cur->right);
+		ref(cur->result);
+	}
+
 	INode *root;
 	vector<Point> &pointData;
 	int XorY;
+	int updateLow, updateHigh;
+		   bool updated;
 };
 
 void solveQuadrantQueries()
@@ -211,11 +227,10 @@ void solveQuadrantQueries()
 	int nQueries;
 	scanf("%d", &nQueries);
 	int *q = new int[4];
-
 	for(int query = 0; query < nQueries; ++query)
 	{
-		char action;
 		int i, j;
+		char action;
 		scanf(" %c %d %d", &action, &i, &j);
 
 		switch (action) {
@@ -230,6 +245,7 @@ void solveQuadrantQueries()
 			intervalTree.reflectY(i-1, j-1);
 			break;
 		}
+
 	}
 }
 
@@ -238,4 +254,3 @@ int main(int argc, char *argv[])
 	solveQuadrantQueries();
 	return 0;
 }
-
