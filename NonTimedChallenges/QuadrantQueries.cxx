@@ -52,11 +52,17 @@ struct Point {
 	int *quadrantInfo;
 };
 
+void printPointVec(const vector<Point> &v) {
+	for(auto it = v.begin(); it != v.end(); ++it)
+		cout << "(" << it->x << ", " << it->y << ")" << endl;
+}
+
 // Interval node
 struct INode 
 {
-	int low, high; // intervals inclusive
+	int low, high, mid; // intervals inclusive
 	INode *left, *right, *parent;
+	bool updated;
 	int *result;
 };
 
@@ -68,13 +74,16 @@ struct ITree
 	INode* constructITree(int low, int high, INode *parent) {
 		INode *cur = new INode;
 		cur->low = low; cur->high = high;
+		cur->mid = (low+high)/2;
 		cur->left = cur->right = 0;
 		cur->parent = parent;
+		cur->updated = true;
+
 		if(cur->low == cur->high)
 			cur->result = pointData[cur->low].quadrantInfo;
 		else {
-			cur->left = constructITree(low, (low+high)/2, cur);
-			cur->right = constructITree(((low+high)/2)+ 1, high, cur);
+			cur->left = constructITree(low, cur->mid, cur);
+			cur->right = constructITree(cur->mid + 1, high, cur);
 			cur->result = new int[4];
 			add(cur->left->result, cur->right->result, cur->result);
 		}
@@ -82,24 +91,109 @@ struct ITree
 	}
 	void getQuadrantInfo(int i, int j, int *qInfo) {
 		fill(qInfo, qInfo+4, 0);
-		getInfo(root, i, j, qInfo);
+		getInfo(i, j, qInfo);
 	}
 
-	void getInfo(INode *cur, int i, int j, int *qInfo) {
+	void getInfo(int i, int j, int *qInfo) {
+		if(!root) return;
+		
+		vector<INode*> stack;
+		stack.push_back(root);
+
+		while(stack.size() > 0) {
+			INode *cur = stack.back();
+			stack.pop_back();
+			if(cur->low >= i && cur->high <= j)
+				add(cur->result, qInfo);
+			else {
+				if(i > cur->mid) 
+					stack.push_back(cur->right);
+				else if(j <= cur->mid)
+					stack.push_back(cur->left);
+				else {
+					stack.push_back(cur->right);
+					stack.push_back(cur->left);
+				}
+			}
+		}
+	}
+
+	void getInfo(INode *cur, const int &i, const int &j, int *qInfo) {
 		if(!cur) return;
+
 		if(cur->low == i && cur->high == j) {
 			add(cur->result, qInfo);
 			return;
 		}
-		int mid = (cur->low + cur->high)/2;
-		if(i > mid) return getInfo(cur->right, i, j, qInfo);
-		if(j <= mid) return getInfo(cur->left, i, j, qInfo);
+
+		if(i > cur->mid) return getInfo(cur->right, i, j, qInfo);
+		if(j <= cur->mid) return getInfo(cur->left, i, j, qInfo);
 		
-		getInfo(cur->right, mid+1, j, qInfo);
-		getInfo(cur->left, i, mid, qInfo);
+		getInfo(cur->right, cur->mid+1, j, qInfo);
+		getInfo(cur->left, i, cur->mid, qInfo);
 	}
+
+	void reflectX(int i, int j) {
+		XorY = 1;
+		reflect(root, i, j);
+	}
+
+	void reflectY(int i, int j) {
+		XorY = 0;
+		reflect(root, i, j);
+	}
+
+	void ref(Point *p) {
+		if( XorY )
+			p->reflectX();
+		else
+			p->reflectY();
+	}
+/*
+	void reflect(int i, int j) {
+		if(!root) return;
+		vector<INode*> stack;
+		root->updated = false;
+		stack.push_back(root);
+		while(stack.size() > 0) {
+			INode *cur = stack.back();
+			if(cur->low == cur->high) {
+				stack.pop_back();
+				ref(&pointData[cur->low]);
+				cur->updated = true;
+			}
+			else {
+				if(i > cur->mid) {
+					cur->right->updated = false;
+					stack.push_back(cur->right);
+				}
+				else if(j <= cur->mid) {
+					cur->left->updated = false;
+					stack.push_back(cur->left);
+				}
+				else if(
+			}
+		}
+		}*/
+
+	void reflect(INode* cur, int i, int j) {
+		if(!cur) return;
+		if(cur->low == cur->high) { 
+			ref(&pointData[cur->low]); return; 
+		}
+
+		if(i > cur->mid) reflect(cur->right, i, j);
+		else if(j <= cur->mid) reflect(cur->left, i, j);
+		else {
+			reflect(cur->left, i , cur->mid);
+			reflect(cur->right, cur->mid+1, j);
+		}
+		add(cur->left->result, cur->right->result, cur->result);
+	}
+
 	INode *root;
 	vector<Point> &pointData;
+	int XorY;
 };
 
 void solveQuadrantQueries()
@@ -110,23 +204,31 @@ void solveQuadrantQueries()
 	for(int point = 0; point < nPoints; ++point)
 	{
 		int x, y;
-		scanf("%d", &x);
-		scanf("%d", &y);
+		scanf("%d %d", &x, &y);
 		pointData.push_back( Point(x,y));
 	}
 	ITree intervalTree(pointData);
 	int nQueries;
 	scanf("%d", &nQueries);
 	int *q = new int[4];
+
 	for(int query = 0; query < nQueries; ++query)
 	{
-		int i, j;
 		char action;
-		cin >> action >> i >> j;
+		int i, j;
+		scanf(" %c %d %d", &action, &i, &j);
 
-		if(action == 'C') {
+		switch (action) {
+		case 'C':
 			intervalTree.getQuadrantInfo(i-1,j-1,q);
 			printQuadrant(q);
+			break;
+		case 'X':
+			intervalTree.reflectX(i-1, j-1);
+			break;
+		case 'Y':
+			intervalTree.reflectY(i-1, j-1);
+			break;
 		}
 	}
 }
