@@ -2,76 +2,66 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
-inline void swap(int *a, int *b) {
+ void swap(int *a, int *b) {
 	int temp = *a;
 	*a = *b; *b = temp; 
 }
-
-inline void findQuadrandInfo(int x, int y, int *quadrantInfo) {
-	memset(quadrantInfo, 0, 4*(sizeof(int)));
+void findQuadrandInfo(int x, int y, int *quadrantInfo) {
 	if(x >= 0)
 		if (y >= 0)  quadrantInfo[0] = 1; else quadrantInfo[3] = 1;
 	else
 		if (y >= 0)  quadrantInfo[1] = 1; else quadrantInfo[2] = 1;
 }
-
-inline void add(int *q1, int *q2, int *sum) {
+void add(int *q1, int *q2, int *sum) {
 	sum[0] = q1[0] + q2[0]; 
 	sum[1] = q1[1] + q2[1];
 	sum[2] = q1[2] + q2[2]; 
 	sum[3] = q1[3] + q2[3];
 }
-
-inline void addTo(int *q1, int *sum) {
+void addTo(int *q1, int *sum) {
 	sum[0] += q1[0];
 	sum[1] += q1[1];	
 	sum[2] += q1[2];
 	sum[3] += q1[3];
 }
-
-inline void reflectQX(int *q) {
+void reflectQX(int *q) {
 	swap(&q[0], &q[3]);
 	swap(&q[1], &q[2]);
 }
-
-inline void reflectQY(int *q) {
+void reflectQY(int *q) {
 	swap(&q[0], &q[1]);
 	swap(&q[3], &q[2]);
 }
-
-inline void printQuadrant(int *q) {
+void printQuadrant(int *q) {
 	printf("%d %d %d %d\n", q[0], q[1], q[2], q[3]);
 }
-
-inline int left(int index) {
+int left(int index) {
 	return 2*index + 4;
 }
-inline int right(int index) {
-	return 2*index + 4;
+int right(int index) {
+	return 2*index + 8;
 }
-inline int parent(int index) {
+int parent(int index) {
 	return (index-4)/2;
 }
-
 int curI, curJ, curReflect;
 int *tree;
 int size;
 int *q;
 
-void initialize(int cur, int low, int high) {	
-	int l = left(cur), r = right(cur), mid = (low+high)/2;
-	if(low+2 == high) {
-		if(low == mid)
-			initialize(r, mid+1, high);
-		else 
-			initialize(l, low, mid);
+void initialize(int cur, int low, int high) {
+	if(low == high) {
+		int x, y;
+		scanf("%d %d", &x, &y);
+		findQuadrandInfo(x, y, tree+cur);
 	}
-	else if(low+1 != high) { // sum up and return
+	else {
+		int l = left(cur), r = right(cur), mid = (low+high)/2;
 		initialize(l, low, mid);
 		initialize(r, mid+1, high);
+
+		add(tree+l, tree+r, tree+cur);
 	}
-	add(tree+l, tree+r, tree+cur);
 }
 
 void getInfo(int cur, int low, int high) {
@@ -123,42 +113,47 @@ void reflect(int cur, int low, int high) {
 	}
 }
 
+void printTree() {
+	for(int i = 0; i < size; i+=4) {
+		printf("i:%d - ", i);
+		printQuadrant(tree+i);
+	}
+}
+
 void solveQuadrantQueries()
 {
-	scanf("%d", &size);
-	tree = (int*)malloc(ceil(log2(size))*size*sizeof(int));
+	int nPoints;
+	scanf("%d", &nPoints);
+	size = ceil(log2(nPoints))*nPoints*4;
 
-	for(int point = 0; point < size; ++point)
-	{
-		int x, y;
-		scanf("%d %d", &x, &y);
-		quadrantData[point] = createQuadrantInfo(x, y);
-	}
-	ITree *intervalTree = createITree(quadrantData, nPoints);
+	tree = (int*)malloc(size*sizeof(int));
+	memset(tree, 0, size*sizeof(int));
+	initialize(0, 0, nPoints-1);
+
 	int nQueries;
 	scanf("%d", &nQueries);
-	int *q = (int*)malloc(4*sizeof(int));
+	q = (int*)malloc(4*sizeof(int));
 	
 	for(int query = 0; query < nQueries; ++query)
 	{
-		int i, j;
 		char action;
-		scanf(" %c %d %d", &action, &i, &j);
-
+		scanf(" %c %d %d", &action, &curI, &curJ);
+		curI--; curJ--;
 		switch (action) {
 		case 'C':
 			memset(q, 0, 4*sizeof(int));
-			getInfo(intervalTree->root, i-1,j-1,q);
+			getInfo(0, 0, nPoints-1);
 			printQuadrant(q);
 			break;
 		case 'X':
-			reflectX(intervalTree, i-1, j-1);
+			curReflect = 1;
+			reflect(0, 0, nPoints-1);
 			break;
 		case 'Y':
-			reflectY(intervalTree, i-1, j-1);
+			curReflect = 0;
+			reflect(0, 0, nPoints-1);
 			break;
 		}
-
 	}
 }
 
