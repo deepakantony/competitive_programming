@@ -57,6 +57,14 @@ typedef struct _INode
 	int *result;
 } INode;
 
+INode* createINode(int low, int high) {
+	INode* node = (INode*)malloc(sizeof(INode));
+	node->low = low; node->high = high;
+	node->mid = (low+high)/2;
+	node->left = node->right = NULL;
+	return node;
+}
+
 typedef struct _ITree
 {
 	INode *root;
@@ -212,7 +220,7 @@ void solveQuadrantQueries()
 {
 	int nPoints;
 	scanf("%d", &nPoints);
-	int **quadrantData = (int**)malloc(nPoints*sizeof(int*));
+	INode **quadrantData = (int**)malloc(nPoints*sizeof(int*));
 	for(int point = 0; point < nPoints; ++point)
 	{
 		int x, y;
