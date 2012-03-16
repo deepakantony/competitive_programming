@@ -1,23 +1,26 @@
 #include <iostream>
 #include <string>
 #include <cassert>
+#include <cstdio>
+#include <algorithm>
+#include <set>
 
 using namespace std;
 
 typedef unsigned short ushort;
 
 ushort flipShort(ushort n)
-{
+{ // flips bits and 0's out last bit
 	return (~n) & (0xFFFF >> 1);
 }
 
 ushort flipBit(ushort n, int bitPosition)
-{
+{ // flip the bit at given position
 	return ((~n) & (1<<bitPosition)) | ((n) & (~(1<<bitPosition)));
 }
 
 string decToBinary(ushort n)
-{
+{ // convert decimal to binary
 	string binary;
 	while(n > 0)
 	{
@@ -30,7 +33,111 @@ string decToBinary(ushort n)
 	return binary;
 }
 
+struct SNode {
+	SNode *left, *right;
+	int low, high, mid;
+	ushort *sortedSet;
+	int setSize;
 
+	SNode(SNode *l, SNode *r, int _low, int _high, ushort *_list) 
+		: left(l), right(r), low(_low), high(_high), mid((_low+_high)/2) {
+		set<ushort> s;
+		for(int index = low; index <= high; ++index)
+			s.insert(_list[index]);
+		setSize = s.size();
+		sortedSet = new ushort[setSize];
+		int index = 0;
+		for(auto it = s.begin(); it != s.end(); ++it)
+			sortedSet[index++] = *it;
+	}
+
+	~SNode() {
+		delete []sortedSet;
+	}
+
+	void print() {
+		printf("[%d, %d] - ", low, high);
+		for(int index = 0; index < setSize; ++index)
+			printf("%d, ", sortedSet[index]);
+		printf("\n");
+	}
+
+	ushort getMaxXor(ushort key) {
+		if(setSize == 1)
+			return (sortedSet[0] ^ key);
+		if(setSize == 2)
+			return max((sortedSet[0] ^ key), (sortedSet[1] ^ key));
+
+		ushort maxXor = 0;
+		for(int index = 0; index < setSize; ++index) {
+			if((sortedSet[index]^key) > maxXor)
+				maxXor = sortedSet[index]^key;
+		}
+		return maxXor;
+
+	}
+};
+
+class SegmentTree {
+public:
+	SegmentTree(ushort *_keyList, int _nKeys) 
+		: keyList(_keyList), nKeys(_nKeys) {
+		root = recurseCreateTree(0, nKeys-1);
+	}
+
+	~SegmentTree() {
+		recurseDeleteTree(root);
+	}
+
+	ushort getMaxXor(ushort key, int l, int h) {
+		return getMaxXor(root, key, l, h);
+	}
+
+	void print() { print(root); }
+private:
+	void recurseDeleteTree(SNode *cur) {
+		if(cur) {
+			recurseDeleteTree(cur->left);
+			recurseDeleteTree(cur->right);
+			delete cur;
+		}
+	}
+
+	SNode *recurseCreateTree(int low, int high) {
+		if(low == high)
+			return new SNode(0, 0, low, high, keyList);
+		else {
+			int mid = (low + high)/2;
+			SNode *l = recurseCreateTree(low, mid);
+			SNode *r = recurseCreateTree(mid+1, high);
+			return new SNode(l, r, low, high, keyList);
+		}
+	}
+
+	void print(SNode *cur) { 
+		if(cur) {
+			cur->print(); print(cur->left); print(cur->right);
+		}
+	}
+	
+	ushort getMaxXor(SNode *cur, ushort key, int l, int h) {
+		if(!cur) return 0;
+		if(cur->low >= l && cur->high <= h) {
+			return cur->getMaxXor(key);
+		}
+		if(cur->low > cur->mid) 
+			return getMaxXor(cur->right, key, l, h);
+		else if(cur->high <= cur->mid)
+			return getMaxXor(cur->left, key, l, h);
+		ushort lMax = getMaxXor(cur->left, key, l, h);
+		ushort rMax = getMaxXor(cur->right, key, l, h);
+		return max(lMax, rMax);
+	}
+
+	SNode *root;
+	ushort *keyList;
+	int nKeys;
+};
 
 
 void unitTest()
@@ -50,9 +157,34 @@ void unitTest()
 	assert(decToBinary(32764) == string("0111111111111100"));
 }
 
+void solveXorKey() 
+{
+	int nTests, nKeys, nQueries;
+	scanf(" %d", &nTests);
+	scanf(" %d %d", &nKeys, &nQueries);
+	for(int test = 0; test < nTests; ++test) {
+		ushort *keyList = new ushort[nKeys];
+
+		for(int key = 0; key < nKeys; ++key)
+			scanf(" %hu", &keyList[key]);
+		SegmentTree *tree = new SegmentTree(keyList, nKeys);
+		ushort key;
+		int low, high;
+		//tree->print();
+		for(int query = 0; query < nQueries; ++query) {
+			scanf(" %hu %d %d", &key, &low, &high);
+
+			printf("%hu\n", tree->getMaxXor(key, low-1, high-1));
+		}
+		delete tree;
+		delete [] keyList;
+	}
+}
+
 int main(int argc, char *argv[])
 {
-	unitTest();
+//	unitTest();
+	solveXorKey();
 	return 0;
 }
 			
