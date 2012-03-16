@@ -6,6 +6,12 @@
 
 using namespace std;
 
+
+void printQuadrant(int *q) {
+	printf("%d %d %d %d\n", q[0], q[1], q[2], q[3]);
+}
+
+
 void wait ( int seconds )
 {
   clock_t endwait;
@@ -13,8 +19,8 @@ void wait ( int seconds )
   while (clock() < endwait) {}
 }
 
-inline bool flip(bool flag) {
-	return flag ? false:true;
+void flip(bool &flag) {
+	flag = flag ? false:true;
 }
 
 void findQuadrandInfo(int x, int y, int *quadrantInfo) {
@@ -47,10 +53,6 @@ void reflectQX(int *q) {
 void reflectQY(int *q) {
 	swap(q[0], q[1]);
 	swap(q[3], q[2]);
-}
-
-void printQuadrant(int *q) {
-	printf("%d %d %d %d\n", q[0], q[1], q[2], q[3]);
 }
 
 struct Point { 
@@ -88,6 +90,7 @@ struct ITree
 		cur->low = low; cur->high = high;
 		cur->left = cur->right = 0;
 		cur->parent = parent;
+		cur->X = cur->Y = 0;
 		if(cur->low == cur->high)
 			cur->result = pointData[cur->low].quadrantInfo;
 		else {
@@ -105,7 +108,11 @@ struct ITree
 
 	void getInfo(INode *cur, int i, int j, int *qInfo) {
 		if(!cur) return;
-		if(cur->low == i && cur->high == j) {
+
+		if(needsUpdate(cur))
+			update(cur);
+
+		if(cur->low >= i && cur->high <= j) {
 			add(cur->result, qInfo);
 			return;
 		}
@@ -140,28 +147,78 @@ struct ITree
 
 	void reflect(INode* cur, int i, int j, int XorY) {
 		if(!cur) return;
-		if(cur->low == cur->high) { 
-			update(cur,XorY);
-		}
 		if(cur->low >= i && cur->high <= j) {
-			update(cur,XorY);
+			propagate(cur, XorY);
+			update(cur);
 			return;
+		}
+		if(needsUpdate(cur)) {
+			update(cur);
 		}
 
 		int mid = (cur->low + cur->high)/2;
-		//cout << cur->low << "," << cur->high << "|" << "Mid: " << mid << endl;
-		if(i > mid) reflect(cur->right, i, j, XorY);
-		else if(j <=mid) reflect(cur->left, i, j, XorY);
+		if(i > mid) {
+			reflect(cur->right, i, j, XorY);
+		}
+		else if(j <=mid) {
+			reflect(cur->left, i, j, XorY);
+		}
 		else {
 			reflect(cur->left, i , mid, XorY);
 			reflect(cur->right, mid+1, j, XorY);
 		}
+		if(needsUpdate(cur->left))
+			update(cur->left);
+		if(needsUpdate(cur->right))
+			update(cur->right);
 		add(cur->left->result, cur->right->result, cur->result);
+		clearUpdateFlag(cur);
 	}
 
-	void update(INode *cur, int XorY) {
-		propagate(cur, XorY);
+	bool needsUpdate(INode *n) {
+		return n->X || n->Y;
+	}
 
+	void propagate(INode *fromNode, INode *toNode) {
+		if(fromNode->X)
+			toNode->X = !toNode->X;
+		if(fromNode->Y)
+			toNode->Y = !toNode->Y;
+	}
+	void propagate(INode *n, int X) {
+		if(X)
+			n->X = !n->X;
+		else
+			n->Y = !n->Y;
+	}
+	void swapupdate(INode *n) {
+//		if(n->X) {printf("[%d, %d] - true", n->low, n->high); printQuadrant(n->result); }
+//		else {printf("[%d, %d] - false", n->low, n->high); printQuadrant(n->result); }
+		if(n->X)
+			reflectQX(n->result);
+		if(n->Y)
+			reflectQY(n->result);
+//		printQuadrant(n->result);
+	}
+
+	void update(INode *cur) {
+		swapupdate(cur);
+		if(cur->left)
+			propagate(cur, cur->left);
+		if(cur->right)
+			propagate(cur, cur->right);
+		clearUpdateFlag(cur);
+	}
+	void clearUpdateFlag(INode *n) {
+		n->X = n->Y = false;
+	}
+	void print() { print(root); }
+	void print(INode *cur) {
+		if(!cur) return;
+		printf("[%d, %d] ", cur->low, cur->high);
+		printQuadrant(cur->result);
+		print(cur->left);
+		print(cur->right);
 	}
 
 	INode *root;
@@ -185,6 +242,7 @@ void solveQuadrantQueries()
 	int *q = new int[4];
 	for(int query = 0; query < nQueries; ++query)
 	{
+		//intervalTree.print();
 		int i, j;
 		char action;
 		scanf(" %c %d %d", &action, &i, &j);
