@@ -3,7 +3,7 @@
 #include <cassert>
 #include <cstdio>
 #include <algorithm>
-#include <set>
+#include <unordered_set>
 
 using namespace std;
 
@@ -33,6 +33,10 @@ string decToBinary(ushort n)
 	return binary;
 }
 
+bool isNthBitOn(ushort n, int bitPosition) {
+	return n & (1<<bitPosition);
+}
+
 struct SNode {
 	SNode *left, *right;
 	int low, high, mid;
@@ -41,7 +45,7 @@ struct SNode {
 
 	SNode(SNode *l, SNode *r, int _low, int _high, ushort *_list) 
 		: left(l), right(r), low(_low), high(_high), mid((_low+_high)/2) {
-		set<ushort> s;
+		unordered_set<ushort> s;
 		for(int index = low; index <= high; ++index)
 			s.insert(_list[index]);
 		setSize = s.size();
@@ -49,6 +53,7 @@ struct SNode {
 		int index = 0;
 		for(auto it = s.begin(); it != s.end(); ++it)
 			sortedSet[index++] = *it;
+		sort(sortedSet, sortedSet+setSize);
 	}
 
 	~SNode() {
@@ -68,14 +73,57 @@ struct SNode {
 		if(setSize == 2)
 			return max((sortedSet[0] ^ key), (sortedSet[1] ^ key));
 
-		ushort maxXor = 0;
-		for(int index = 0; index < setSize; ++index) {
-			if((sortedSet[index]^key) > maxXor)
-				maxXor = sortedSet[index]^key;
+		int first =0, last = setSize-1;
+		for(int bit = 15; bit >= 0 && first < last; bit--) {
+			if(isNthBitOn(key, bit))
+				last = findUpperBound(first, last, bit);
+			else
+				first = findLowerBound(first,last, bit);
+			/*printf("****** [%d %d] ****** [", first, last);
+			for(int i = first; i <= last; i++)
+				printf("%d, ", sortedSet[i]);
+			printf("] - %s\n", decToBinary(key).c_str());
+			*/
 		}
-		return maxXor;
-
+		//printf("****** [%d %d] ******", first, last);
+		return sortedSet[first] ^ key;
 	}
+
+	int findLowerBound(int first, int last, int bitPos) {
+		//	printf("Finding lower bound\n");
+		int curLow = first;
+		while(first <= last) {
+			int mid = (first+last)/2;
+			//	printf("*** %d %d %s ***\n", sortedSet[mid], bitPos, decToBinary(sortedSet[mid]).c_str());
+			if(isNthBitOn(sortedSet[mid], bitPos)) {
+
+				curLow = mid;
+				last = mid - 1;
+			}
+			else {
+				first = mid + 1;
+			}
+		}
+		return curLow;
+	}
+
+	int findUpperBound(int first, int last, int bitPos) {
+		//printf("Finding upper bound\n");
+		int curHigh = last;
+		while(first <= last) {
+			int mid = (first+last)/2;
+			//printf("*** %d %d %s ***\n", sortedSet[mid], bitPos, decToBinary(sortedSet[mid]).c_str());
+			if(isNthBitOn(sortedSet[mid], bitPos)) {
+				curHigh = mid;
+				last = mid - 1;
+			}
+			else {
+				first = mid+1;
+			}
+		}
+		return curHigh;
+	}
+
 };
 
 class SegmentTree {
@@ -123,6 +171,9 @@ private:
 	ushort getMaxXor(SNode *cur, ushort key, int l, int h) {
 		if(!cur) return 0;
 		if(cur->low >= l && cur->high <= h) {
+			/*ushort res = cur->getMaxXor(key);
+			printf("(%d %d %d)\n", res, key, res^key);
+			cur->print();*/
 			return cur->getMaxXor(key);
 		}
 		if(cur->low > cur->mid) 
