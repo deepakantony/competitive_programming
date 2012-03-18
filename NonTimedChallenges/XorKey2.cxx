@@ -18,9 +18,23 @@ struct BNode {
 	ushort data;
 };
 struct BTree {
-	BTree() { root = 0; cheatSet.clear(); }
+	BTree() { root = new BNode(0,0,0,0); cheatSet.clear(); }
 	void insert(ushort x) {
-		cheatSet.insert(x);
+		if(cheatSet.find(x) != cheatSet.end()) {
+			insertBin(root, x, 15);
+			cheatSet.insert(x);
+		}
+	}
+	void insertBin(BNode *cur, ushort x, int bitPos) {
+		if(bitPos == 0) {
+			if(isNthBitOn(x,bitPos))
+				cur->left = new BNode(0, 0, cur, x);
+			else
+				cur->right = new BNode(0, 0, cur, x);
+		}
+		else {
+
+		}
 	}
 	void insert2(ushort x) {
 		if(!root) root = new BNode(0, 0, 0, x);
