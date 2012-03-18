@@ -40,25 +40,24 @@ bool isNthBitOn(ushort n, int bitPosition) {
 struct SNode {
 	SNode *left, *right;
 	int low, high, mid;
-	ushort *sortedSet;
+	vector<ushort> sortedSet;
 	int setSize;
 
 	SNode(SNode *l, SNode *r, int _low, int _high, ushort *_list) 
-		: left(l), right(r), low(_low), high(_high), mid((_low+_high)/2) {
+		: left(l), right(r), low(_low), high(_high) {
+		mid = (low+high)/2;
 		unordered_set<ushort> s;
 		for(int index = low; index <= high; ++index)
 			s.insert(_list[index]);
 		setSize = s.size();
-		sortedSet = new ushort[setSize];
+		//sortedSet = new ushort[setSize];
 		int index = 0;
 		for(auto it = s.begin(); it != s.end(); ++it)
-			sortedSet[index++] = *it;
-		sort(sortedSet, sortedSet+setSize);
+			sortedSet.push_back(*it);
+		//sort(sortedSet, sortedSet+setSize);
 	}
 
-	~SNode() {
-		delete []sortedSet;
-	}
+
 
 	void print() {
 		printf("[%d, %d] - ", low, high);
@@ -68,6 +67,18 @@ struct SNode {
 	}
 
 	ushort getMaxXor(ushort key) {
+		ushort max = 0;
+		for(auto it = sortedSet.begin(); it != sortedSet.end(); ++it) {
+			ushort temp = (*it) ^ key;
+			if(temp > max)
+				max = temp;
+		}
+		return max;
+	}
+			
+			
+
+	ushort getMaxXor2(ushort key) {
 		if(setSize == 1)
 			return (sortedSet[0] ^ key);
 		if(setSize == 2)
@@ -79,22 +90,22 @@ struct SNode {
 				last = findUpperBound(first, last, bit);
 			else
 				first = findLowerBound(first,last, bit);
-			/*printf("****** [%d %d] ****** [", first, last);
-			for(int i = first; i <= last; i++)
-				printf("%d, ", sortedSet[i]);
-			printf("] - %s\n", decToBinary(key).c_str());
-			*/
+			//printf("****** [%d %d] ****** [", first, last);
+			//for(int i = first; i <= last; i++)
+			//printf("%d, ", sortedSet[i]);
+			//printf("] - %s\n", decToBinary(key).c_str());
+			
 		}
 		//printf("****** [%d %d] ******", first, last);
-		return sortedSet[first] ^ key;
+		return (sortedSet[first] ^ key);
 	}
 
 	int findLowerBound(int first, int last, int bitPos) {
-		//	printf("Finding lower bound\n");
+		//printf("Finding lower bound\n");
 		int curLow = first;
 		while(first <= last) {
 			int mid = (first+last)/2;
-			//	printf("*** %d %d %s ***\n", sortedSet[mid], bitPos, decToBinary(sortedSet[mid]).c_str());
+			//printf("*** %d %d %s ***\n", sortedSet[mid], bitPos, decToBinary(sortedSet[mid]).c_str());
 			if(isNthBitOn(sortedSet[mid], bitPos)) {
 
 				curLow = mid;
@@ -114,10 +125,11 @@ struct SNode {
 			int mid = (first+last)/2;
 			//printf("*** %d %d %s ***\n", sortedSet[mid], bitPos, decToBinary(sortedSet[mid]).c_str());
 			if(isNthBitOn(sortedSet[mid], bitPos)) {
-				curHigh = mid;
+
 				last = mid - 1;
 			}
 			else {
+				curHigh = mid;
 				first = mid+1;
 			}
 		}
@@ -130,7 +142,8 @@ class SegmentTree {
 public:
 	SegmentTree(ushort *_keyList, int _nKeys) 
 		: keyList(_keyList), nKeys(_nKeys) {
-		root = recurseCreateTree(0, nKeys-1);
+		root = simpleCreate(0, nKeys-1);
+		//root = recurseCreateTree(0, nKeys-1);
 	}
 
 	~SegmentTree() {
@@ -138,17 +151,69 @@ public:
 	}
 
 	ushort getMaxXor(ushort key, int l, int h) {
-		return getMaxXor(root, key, l, h);
+		return getMaxXor2(root, key, l, h);
 	}
 
 	void print() { print(root); }
 private:
+	ushort getMaxXor2(SNode *cur, ushort key, int l, int h) {
+/*		if(l > h) {
+			printf("HOW DID THIS HAPPEN\n");
+			return 0;
+			}*/
+		if(cur->low >= l && cur->high <= h)  {
+			//ushort res = cur->getMaxXor(key);
+			//printf("(%d %d %d)\n", res, key, res^key);
+			//cur->print();
+			return cur->getMaxXor(key);
+		}
+/*
+		//if(l <= cur->mid && !cur->left) 
+		if(!cur->left)
+		
+		 	cur->left = simpleCreate(cur->low, cur->mid);
+		//if(h > cur->mid && !cur->right)
+		if(!cur->right)
+			cur->right = simpleCreate(cur->mid+1, cur->high);
+*/
+		ushort lmax = 0, rmax = 0;
+		if(l > cur->mid) {
+			if(!cur->right)
+				cur->right = simpleCreate(cur->mid+1, cur->high);
+			return getMaxXor2(cur->right, key, l, h);
+		}
+		else if(h <= cur->mid) {
+			if(!cur->left)
+				cur->left = simpleCreate(cur->low, cur->mid);
+			return getMaxXor2(cur->left, key, l, h);
+		}
+		else {
+/*		if(l <= cur->mid)
+			lmax = getMaxXor2(cur->left, key, l, h);
+		if(h > cur->mid)
+		rmax = getMaxXor2(cur->right, key, l, h);*/
+			if(!cur->left)
+				cur->left = simpleCreate(cur->low, cur->mid);
+			if(!cur->right)
+				cur->right = simpleCreate(cur->mid+1, cur->high);
+				
+			lmax = getMaxXor2(cur->left, key, l, cur->mid);
+			rmax = getMaxXor2(cur->right, key, cur->mid+1, h);
+			return lmax > rmax ? lmax : rmax;
+
+		}
+	}
+
 	void recurseDeleteTree(SNode *cur) {
 		if(cur) {
 			recurseDeleteTree(cur->left);
 			recurseDeleteTree(cur->right);
 			delete cur;
 		}
+	}
+	
+	SNode* simpleCreate(int low, int high) {
+			return new SNode(0, 0, low, high, keyList);
 	}
 
 	SNode *recurseCreateTree(int low, int high) {
@@ -176,9 +241,9 @@ private:
 			cur->print();*/
 			return cur->getMaxXor(key);
 		}
-		if(cur->low > cur->mid) 
+		if(l > cur->mid) 
 			return getMaxXor(cur->right, key, l, h);
-		else if(cur->high <= cur->mid)
+		else if(h <= cur->mid)
 			return getMaxXor(cur->left, key, l, h);
 		ushort lMax = getMaxXor(cur->left, key, l, h);
 		ushort rMax = getMaxXor(cur->right, key, l, h);
@@ -190,6 +255,34 @@ private:
 	int nKeys;
 };
 
+ushort naiveImpl(ushort key, ushort *keyList, int l, int h) {
+	ushort max = 0;
+	for(int index = l; index <= h; ++index)
+	{
+		ushort temp = keyList[index] ^ key;
+		if(temp > max) max = temp;
+	}
+	return max;
+}
+
+void printInfo(ushort *keyList, int low, int high, 
+			   ushort key, ushort res1, ushort res2) {
+	printf("**********************************************************\n");
+	printf("low: %d, high: %d, treeres: %hu, naive: %hu, key: %hu\n",
+		   low, high, res1, res2, key);
+	for(int index = low; index <= high; ++index)
+		printf("[%hu %hu %hu %d]\n", key, keyList[index], keyList[index]^key, index);
+}
+
+void runTreeTest(SegmentTree *tree, ushort *keyList, ushort key,
+				 int low, int high) {
+	ushort res1 = tree->getMaxXor(key, low, high);
+	ushort res2 = naiveImpl(key, keyList, low, high);
+	if(res1 != res2) {
+		tree->print();
+		printInfo(keyList, low, high, key, res1, res2);
+	}
+}
 
 void unitTest()
 {
@@ -206,6 +299,28 @@ void unitTest()
 	// decToBinary functionxs
 	assert(decToBinary(2) == string("0000000000000010"));
 	assert(decToBinary(32764) == string("0111111111111100"));
+	
+	int size = 100000;
+	for(int test = 0; test < 6; ++test) {
+		ushort *keyList = new ushort[size];
+		for(int key = 0; key < size; key++)
+			keyList[key] = rand() % 65536;
+		SegmentTree *tree = new SegmentTree(keyList, size);
+
+/*
+		for(int query = 0; query < 5000; ++query) {
+			ushort key = rand() % 65536;
+			int low = rand() % size, high = low + rand() % (size-low);
+			runTreeTest(tree, keyList, key, low, high);
+			}*/
+		runTreeTest(tree, keyList, 12345, 0, size-1);
+		runTreeTest(tree, keyList, 12345, 0, size-1/2);
+		runTreeTest(tree, keyList, 12345, ((size-1)/2)+1, size-1);
+		runTreeTest(tree, keyList, 12345, ((size-1)/2)+1, (size-1)*3/4);
+		runTreeTest(tree, keyList, 12345, size-1, size-1);
+		delete tree;
+		delete [] keyList;
+	}
 }
 
 void solveXorKey() 
@@ -234,8 +349,8 @@ void solveXorKey()
 
 int main(int argc, char *argv[])
 {
-//	unitTest();
-	solveXorKey();
+	unitTest();
+//  solveXorKey();
 	return 0;
 }
-			
+
