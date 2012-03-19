@@ -1,3 +1,79 @@
+// Quadrant Queries 
+// 
+// There are N points in the plane. The ith point has coordinates (xi, yi). 
+// Perform the following queries: 
+// 
+// 
+// 1) Reflect all points between point i and j both including along the X 
+// axis. This query is represented as "X i j"
+// 2) Reflect all points between point i and j both including along the Y 
+// axis. This query is represented as "Y i j"
+// 3) Count how many points between point i and j both including lie in each 
+// of the 4 quadrants. This query is represented as "C i j"
+// 
+// Input:
+// The first line contains N, the number of points. N lines follow. 
+// The ith line contains xi and yi separated by a space. 
+// The next line contains Q the number of queries. The next Q lines contain 
+// one query each, of one of the above forms. 
+// All indices are 1 indexed.
+// 
+// Output:
+// Output one line for each query of the type "C i j". The corresponding 
+// line contains 4 integers; the number of points having indices in the 
+// range [i..j] in the 1st,2nd,3rd and 4th quadrants respectively.
+// 
+// Constraints:
+// 1 <= N <= 100000
+// 1 <= Q <= 1000000
+// You may assume that no point lies on the X or the Y axis.
+// All (xi,yi) will fit in a 32-bit signed integer
+// In all queries, 1 <=i <=j <=N
+// Sample Input:                                                     
+// 4         
+// 1 1         
+// -1 1         
+// -1 -1
+// 1 -1
+// 5
+// C 1 4
+// X 2 4
+// C 3 4
+// Y 1 2
+// C 1 3
+// 
+// Sample Output:
+// 1 1 1 1
+// 1 1 0 0
+// 0 2 0 1
+// 
+// Explanation
+//  
+// When a query says "X i j", it means that take all the points between 
+// indices i and j both including and reflect those points along the X axis. 
+// The i and j here have nothing to do with the co-ordinates of the points. 
+// They are the indices.  i refers to point i and j refers to point j
+//  
+// 'C 1 4' asks you to 'Consider the set of points having index in {1,2,3,4}. 
+// Amongst those points, how many of them lie in the 1st,2nd,3rd and 4th 
+// quads respectively?' 
+// The answer to this is clearly 1 1 1 1.
+//  
+// Next we reflect the points between indices '2 4' along the X axis. So the 
+// new coordinates are :
+// 1 1
+// -1 -1
+// -1 1
+// 1 1
+//  
+// Now 'C 3 4' is 'Consider the set of points having index in {3,4}. Amongst 
+// those points, how many of them lie in the 1st,2nd,3rd and 4th quads 
+// respectively?' Point 3 lies in quadrant 2 and point 4 lies in quadrant 1. 
+// So the answer is 1 1 0 0
+// 
+
+// Solution uses segment tree with late propagation for query updates.
+
 #include <iostream>
 #include <vector>
 #include <algorithm>
