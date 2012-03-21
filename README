@@ -1,1 +1,6 @@
-This is a project repo for all my SPOJ (sphere online judge) solutions. For this I'll try using python for most solutions.
+This is a project repo for all my competitive programming. 
+
+Topcoder solutions are mostly using c/c++.
+SPOJ (sphere online judge) solutions are under spoj directory. For this I'll try using python for most solutions.
+IStreet directory contains solutions to interview street; most coding is using c/c++/python.
+
