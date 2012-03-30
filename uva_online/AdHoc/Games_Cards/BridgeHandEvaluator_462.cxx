@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 {
 	int stopped[4], count[4], king[4], queen[4], jack[4];
 	char card[3];
-	int score;
+	int score, notrumpScore;
 	int curSuit;
 	while(!feof(stdin))
 	{
@@ -110,6 +110,7 @@ int main(int argc, char *argv[])
 			case 'J': score += 1; jack[curSuit] = 1; break;
 			}
 		}
+		notrumpScore = score;
 		if(feof(stdin)) break;
 		int allStopped = 1;
 		int maxIndex = 0;
@@ -119,22 +120,23 @@ int main(int argc, char *argv[])
 			if(count[i] == 2) score++;
 			if (king[i]) 
 				if(count[i] > 1) stopped[i] = 1;
-				else score--;
+				else { score--; notrumpScore--; }
 			if (queen[i])
 				if (count[i] > 2) stopped[i] = 1;
-				else score--;
-			if (jack[i] && count[i] <= 3) score--;
+				else { score--; notrumpScore--; }
+			if (jack[i] && count[i] <= 3) { score--; notrumpScore--; }
 			if(stopped[i] == 0) allStopped = 0;
 			if(count[i] > max) {
 				max = count[i];
 				maxIndex = i;
 			}
 		}
+//		printf("%d\t%d\t", score, notrumpScore);
 		if(score < 14) 
 			printf("PASS\n");
 		else {
 			printf("BID ");
-			if(allStopped && score >= 16)
+			if(allStopped && notrumpScore >= 16)
 				printf("NO-TRUMP\n");
 			else {
 				switch(maxIndex) {
