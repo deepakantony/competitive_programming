@@ -53,6 +53,7 @@
 #include <algorithm>
 #include <climits>
 #include <cstring>
+#include <ctime>
 
 using namespace std;
 
@@ -72,6 +73,7 @@ int minCost(int left, int right)
 
 int main(int argc, char *argv[])
 {
+	clock_t start = clock();
 	int l, n;
 	scanf(" %d", &l);
 	cutList[0] = 0;
@@ -83,5 +85,6 @@ int main(int argc, char *argv[])
 		printf("The minimum cutting is %d.\n", minCost(0, n+1));
 		scanf(" %d", &l);
 	}
+	fprintf(stderr, "Time taken: %.2f\n", ((double)clock()-start)/CLOCKS_PER_SEC);
 	return 0;
 }
