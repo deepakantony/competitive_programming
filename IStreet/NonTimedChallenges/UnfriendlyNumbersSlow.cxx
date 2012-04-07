@@ -187,6 +187,7 @@ int main(int argc, char *argv[])
 //	subtract_factors();
 //	printSubFactors();
 	printf("%d\n", solveUnfriendlyNumbers());
+//	printMax(pow(10,13));
 
 	clock_t end = clock();
 	fprintf(stderr, "%.4fs\n", (double)(end-start)/CLOCKS_PER_SEC);
