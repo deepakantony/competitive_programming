@@ -1,14 +1,15 @@
 #include <cstdio>
 
+
 #define REP(i, st, n) for(int (i) = (st); (i) < (n); ++(i))
 
 
 int main(int argc, char *argv[])
 {
-	int a[150][150];
-	int N, N2;
+	int a[75][75];
+	int N;
 
-	int newst, k, l, prefix[150], temp, x1,y1,x2,y2;
+	int newst, k, l, prefix[75], tempmin, tempmax, maxSum, minSum, rowTotal;
 	int stIdx[150];
 
 	int nTests; scanf(" %d", &nTests);
@@ -16,57 +17,64 @@ int main(int argc, char *argv[])
 	while(nTests--)
 	{
 		scanf(" %d", &N);
-		N2 = 2*N-2; if(!N2) N2 = N;
+
 		REP(i, 0, N) REP(j, 0, N) 
-		{ 
 			scanf(" %d", &a[i][j]); 
-			a[N+i][j] = a[i][N+j] = a[i+N][j+N] = a[i][j];
-		}
-		int maxSum = -100*150*150; // -INF - for this prob
+
+		maxSum = -101*75*75; // -INF - for this prob
+		
 		REP(row, 0, N) 
 		{
-			REP(col, 0, N2) prefix[col] = 0;
+			REP(col, 0, N) prefix[col] = 0;
 
-			REP(row2, row, N2) 
+			REP(row2, row, N) 
 			{
-				newst = temp = k = l = 0; 
-
-				if(row2 >= N && row <= (row2-(N-1))) break;
+				rowTotal = tempmax = tempmin = 0; 
+				minSum = 101*75*75;
 				REP(col, 0, N) 
 				{
-					if(col >= N) {
-						if(col == N && newst == 0)
-						{ newst = 2; temp -= (prefix[0] + prefix[1]); }
-						else if(newst <= col-(N-1))
-						{ newst = col-(N-2); temp -= prefix[col-(N-1)]; }
-						if(temp < 0) { temp = 0; newst = col; }
-					}
 					prefix[col] += a[row2][col];
-					temp += prefix[col];
-					if(temp > maxSum) {
-						maxSum = temp;
-						x1 = row+1; x2 = row2+1;
-						y1 = k = newst+1; 
-						y2 = l = col+1; 
-					}
-					if(temp < 0) {
-						temp = 0;
-						newst = col + 1;
-					}
-				}
-				memset(stIdx, 0, sizeof stIdx);
-				newst = 0;
-				for(int col = N-1; col >= 0; col--)
-					if(prefix[col] 
 
-				REP(col, N, N+N-2)
-				{
-					
+					tempmax += prefix[col];
+					if(tempmax > maxSum) maxSum = tempmax;
+					if(tempmax < 0)	tempmax = 0;
+
+					tempmin += prefix[col];
+					if(tempmin < minSum) minSum = tempmin;
+					if(tempmin > 0) tempmin = 0;
+
+					rowTotal += prefix[col];						
 				}
+				if((rowTotal-minSum) > maxSum && maxSum > 0) maxSum = rowTotal-minSum;
+			}
+		}
+		int colTotal;
+		REP(col, 0, N) 
+		{
+			REP(row, 0, N) prefix[row] = 0;
+			REP(col2, col, N)
+			{
+				colTotal = tempmax = tempmin = 0;
+				minSum = 101*75*75;
+				REP(row, 0, N)
+				{
+					prefix[row] += a[row][col2];
+
+					tempmax += prefix[row];
+					if(tempmax > maxSum) maxSum = tempmax;
+					if(tempmax < 0) tempmax = 0;
+
+					tempmin += prefix[row];
+					if(tempmin < minSum) minSum = tempmin;
+					if(tempmin > 0) tempmin = 0;
+
+					colTotal += prefix[row];
+				}
+				if((colTotal-minSum) > maxSum && maxSum > 0) maxSum = colTotal-minSum;
 			}
 		}
 		printf("%d\n", maxSum);
-		printf("%d (%d %d) (%d %d)\n", maxSum, x1, y1, x2, y2);
+
 	}
 
 	return 0;
