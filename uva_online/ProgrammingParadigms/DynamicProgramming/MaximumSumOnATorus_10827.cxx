@@ -6,10 +6,10 @@
 
 int main(int argc, char *argv[])
 {
-	int a[75][75];
+	int a[75][150];
 	int N;
 
-	int newst, k, l, prefix[75], tempmin, tempmax, maxSum, minSum, rowTotal;
+	int newst, k, l, prefix[150], tempmin, tempmax, maxSum, minSum, rowTotal;
 	int stIdx[150];
 
 	int nTests; scanf(" %d", &nTests);
@@ -18,8 +18,10 @@ int main(int argc, char *argv[])
 	{
 		scanf(" %d", &N);
 
-		REP(i, 0, N) REP(j, 0, N) 
-			scanf(" %d", &a[i][j]); 
+		REP(i, 0, N) REP(j, 0, N) {
+			scanf(" %d", &a[i][j]);
+			a[i][N+j] = a[i][j];
+		}
 
 		maxSum = -101*75*75; // -INF - for this prob
 		
@@ -48,11 +50,12 @@ int main(int argc, char *argv[])
 				if((rowTotal-minSum) > maxSum && maxSum > 0) maxSum = rowTotal-minSum;
 			}
 		}
-		int colTotal;
+		int colTotal, limit;
 		REP(col, 0, N) 
 		{
 			REP(row, 0, N) prefix[row] = 0;
-			REP(col2, col, N)
+			limit = col==0?N:N-1+col;
+			REP(col2, col, limit)
 			{
 				colTotal = tempmax = tempmin = 0;
 				minSum = 101*75*75;
