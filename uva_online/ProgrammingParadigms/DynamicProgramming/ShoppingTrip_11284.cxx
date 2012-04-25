@@ -1,32 +1,91 @@
 #include <cstdio>
+#include <iostream>
 #include <vector>
 #include <utility>
 #include <algorithm>
 #include <climits>
 #include <cassert>
 #include <queue>
-#include <greater>
+#include <functional>
+#include <map>
+#include <set>
 
 using namespace std;
 
 #define REP(i, st, n) for(int (i) = (st); (i) < (n); ++(i))
 #define FOREACH(it, ctnr) for(__typeof__(ctnr.begin()) it = ctnr.begin(); \
 							  it != ctnr.end(); ++it)
+#define INF 1000000000
 
 bool isBitOn(int num, int pos) { return (num&(1<<pos)) != 0; }
 int unsetBit(int num, int pos) { return (num&(~(1<<pos))); }
 
-int dist[13][13];
+int finalCost[13][13];
 int memo[13][(1<<13)-1];
-int nDVD;
+int nDVD; 
+int stores[13];
+
+
+#define ii pair<int, int>
+#define VI vector<int>
+#define VII vector< ii >
+#define VVII vector< VII >
+#define VMII vector< map<int, int > >
+class Graph {
+public:
+	Graph(int size) : adjList(size) {} 
+	int addEdge(int vertex1, int vertex2, int weight) {
+		if(adjList.size() <= vertex1 || adjList.size() <= vertex2)
+			adjList.resize(max(vertex1+1, vertex2+1));
+		adjList[vertex1][vertex2] = weight;
+		adjList[vertex2][vertex1] = weight;
+	}
+	int size() {return adjList.size(); }
+	void shortestPath(int vertex, VI &dist) {
+		assert(dist.size() == adjList.size());
+		assert(vertex >= 0 && vertex < adjList.size());
+
+		fill(dist.begin(), dist.end(), INF);
+		set< ii > minSet;
+		minSet.insert(ii(0, vertex));
+		while(!minSet.empty()) {
+			int curVertex = minSet.begin()->second;
+			int curDist = minSet.begin()->first;
+			dist[curVertex] = min(dist[curVertex], curDist);
+			minSet.erase(minSet.begin());
+			FOREACH(it, adjList[curVertex]) 
+				if(dist[it->first] > (it->second+dist[curVertex]))
+					minSet.insert(ii(it->second+dist[curVertex], it->first));
+		}
+	}
+private:
+	VMII adjList;
+};
+
+
+
+void updateDistForTSP(Graph &G) 
+{
+	REP(i, 0, nDVD+1) {
+		VI finalTravelDist(G.size());
+		G.shortestPath(i, finalTravelDist);
+		REP(j, 0, nDVD+1) {
+			finalCost[i][j] = finalTravelDist[stores[j]];
+			printf("%d ", finalCost[i][j]);
+		}
+		printf("\n");
+	}
+}
 
 int TSP(int curpos, int bitmask) {
 	if(memo[curpos][bitmask] == -1) {
-		if(bitmask == 0) memo[curpos][bitmask] = dist[curpos][0];
+		if(bitmask == 0) 
+			memo[curpos][bitmask] = finalCost[curpos][0];
 		else {
-			REP(pos, 1, nDVD) {
+			REP(pos, 1, nDVD+1) {
 				if(isBitOn(bitmask, pos)) {
-					int res = TSP(pos, unsetBit(bitmask, pos));
+					int res = finalCost[curpos][pos] +
+						TSP(pos, unsetBit(bitmask, pos));
 					if(memo[curpos][bitmask] == -1 ||
 					   res < memo[curpos][bitmask])
 						memo[curpos][bitmask];
@@ -41,39 +100,33 @@ int TSP() {
 	return TSP(0, unsetBit((1<<nDVD)-1, 0));
 }
 
-#define VI vector<int> 
-#define VVI vector< VI >
-class Graph {
-	Graph(int size) : adjList(size) {} 
-	int addEdge(int vertex1, int vertex2, int weight) {
-		if(adjList.size() <= vertex1 || adjList.size() <= vertex2)
-			adjList.resize(max(vertex1+1, vertex2+1));
-		adjList[vertex1].push_back(make_pair(vertex2, weight));
-		adjList[vertex2].push_back(make_pair(vertex1, weight));
-	}
-	int numberOfVertices() {adjList.size(); }
-	void shortestPath(int vertex, vector<int> &dist) {
-		assert(dist.size() == adjList.size());
-		assert(vertex >= 0 && vertex < adjList.size());
-
-		fill(dist.begin(), dist.end(), MAX_INT);
-		priority_queue<int, greater<int> > Q;
-		FOREACH(it, adjList[vertex])
-			Q.push(*it);
-		dist[vertex] = 0;
-		while(!Q.empty()) {
-			int curVertex = Q.top();
-			Q.pop();
-			dist[curVertex] = 
-		}
-	}
-private:
-	VVI adjList;
-};
-
 int main(int argc, char *argv[])
 {
-
+	int nTests; scanf("%d", &nTests);
+	while(nTests--) {
+		int N, M; scanf(" %d %d", &N, &M);
+		Graph G(N+1);
+		while(M--) {
+			int v1,v2, w1,w2;
+			scanf(" %d %d %d.%d", &v1, &v2, &w1, &w2);
+			G.addEdge(v1,v2,w1*100+w2);
+		}
+		int sum = 0;
+		scanf(" %d", &nDVD);
+		stores[0] = 0;
+		REP(i, 1, nDVD+1) {
+			int cost1, cost2;
+			scanf(" %d %d.%d", &stores[i], &cost1, &cost2);
+			sum += (cost1*100 + cost2);
+		}
+		updateDistForTSP(G);
+		memset(memo, -1, sizeof memo);
+		int tspRes = TSP();
+		int res = sum - tspRes;
+		printf("--%d %d %d\n", sum, tspRes, res);
+		if(res <= 0) printf("Don't leave the house\n");
+		else printf("Daniel can save $%d.%d\n", res/100, res%100);
+	}
 	return 0;
 }
 
