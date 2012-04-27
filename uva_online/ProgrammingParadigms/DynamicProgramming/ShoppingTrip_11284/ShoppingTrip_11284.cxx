@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <vector>
 #include <utility>
@@ -12,7 +13,7 @@
 
 using namespace std;
 
-#define REP(i, st, n) for(int (i) = (st); (i) < (n); ++(i))
+#define REP(i, st, n) for(int (i) = (st), _n = (n) ; (i) < (_n); ++(i))
 #define FOREACH(it, ctnr) for(__typeof__(ctnr.begin()) it = ctnr.begin(); \
 							  it != ctnr.end(); ++it)
 #define INF 1000000000
@@ -21,9 +22,10 @@ bool isBitOn(int num, int pos) { return (num&(1<<pos)) != 0; }
 int unsetBit(int num, int pos) { return (num&(~(1<<pos))); }
 
 int finalCost[13][13];
-int memo[13][(1<<13)-1];
+int memo[13][(1<<13)];
 int nDVD; 
 int stores[13];
+int costSaving[13];
 
 
 #define ii pair<int, int>
@@ -37,8 +39,15 @@ public:
 	int addEdge(int vertex1, int vertex2, int weight) {
 		if(adjList.size() <= vertex1 || adjList.size() <= vertex2)
 			adjList.resize(max(vertex1+1, vertex2+1));
-		adjList[vertex1][vertex2] = weight;
-		adjList[vertex2][vertex1] = weight;
+		if(adjList[vertex1].find(vertex2) == adjList[vertex1].end())
+			adjList[vertex1][vertex2] = weight;
+		else
+			adjList[vertex1][vertex2] = min(adjList[vertex1][vertex2],weight);
+		if(adjList[vertex2].find(vertex1) == adjList[vertex2].end())
+			adjList[vertex2][vertex1] = weight;
+		else
+			adjList[vertex2][vertex1] = min(adjList[vertex2][vertex1],weight);
+		
 	}
 	int size() {return adjList.size(); }
 	void shortestPath(int vertex, VI &dist) {
@@ -68,27 +77,26 @@ void updateDistForTSP(Graph &G)
 {
 	REP(i, 0, nDVD+1) {
 		VI finalTravelDist(G.size());
-		G.shortestPath(i, finalTravelDist);
+		G.shortestPath(stores[i], finalTravelDist);
 		REP(j, 0, nDVD+1) {
 			finalCost[i][j] = finalTravelDist[stores[j]];
-			printf("%d ", finalCost[i][j]);
+			//printf("%d ", finalCost[i][j]);
 		}
-		printf("\n");
+		//printf("\n");
 	}
 }
 
 int TSP(int curpos, int bitmask) {
-	if(memo[curpos][bitmask] == -1) {
+	if(memo[curpos][bitmask] == -INF) {
 		if(bitmask == 0) 
-			memo[curpos][bitmask] = finalCost[curpos][0];
+			memo[curpos][bitmask] = -finalCost[curpos][0];
 		else {
 			REP(pos, 1, nDVD+1) {
 				if(isBitOn(bitmask, pos)) {
-					int res = finalCost[curpos][pos] +
+					int res = costSaving[pos] - finalCost[curpos][pos] +
 						TSP(pos, unsetBit(bitmask, pos));
-					if(memo[curpos][bitmask] == -1 ||
-					   res < memo[curpos][bitmask])
-						memo[curpos][bitmask];
+					res = max(res, TSP(curpos, unsetBit(bitmask, pos)));
+					memo[curpos][bitmask] = res;
 				}
 			}
 		}
@@ -97,7 +105,7 @@ int TSP(int curpos, int bitmask) {
 }
 
 int TSP() {
-	return TSP(0, unsetBit((1<<nDVD)-1, 0));
+	return TSP(0, unsetBit((1<<(nDVD+1))-1, 0));
 }
 
 int main(int argc, char *argv[])
@@ -114,18 +122,19 @@ int main(int argc, char *argv[])
 		int sum = 0;
 		scanf(" %d", &nDVD);
 		stores[0] = 0;
+		costSaving[0] = 0;
 		REP(i, 1, nDVD+1) {
 			int cost1, cost2;
 			scanf(" %d %d.%d", &stores[i], &cost1, &cost2);
-			sum += (cost1*100 + cost2);
+			costSaving[i] = cost1*100 + cost2;
 		}
 		updateDistForTSP(G);
-		memset(memo, -1, sizeof memo);
+		REP(i, 0, nDVD+1) REP(j, 0, 1<<(nDVD+1)) memo[i][j] = -INF;
 		int tspRes = TSP();
-		int res = sum - tspRes;
-		printf("--%d %d %d\n", sum, tspRes, res);
+		int res = tspRes;
+		//printf("--%d %d %d\n", sum, tspRes, res);
 		if(res <= 0) printf("Don't leave the house\n");
-		else printf("Daniel can save $%d.%d\n", res/100, res%100);
+		else printf("Daniel can save $%d.%02d\n", res/100, res%100);
 	}
 	return 0;
 }
