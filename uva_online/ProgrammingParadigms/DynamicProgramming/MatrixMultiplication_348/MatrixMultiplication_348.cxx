@@ -11,17 +11,28 @@ LL row[101][101];
 LL col[101][101];
 LL pos[101][101];
 
+
+// memo(l, r) = 0 if (l+1 == r)
+//            = min(memo(l, l+i) + memo(l+i, r) + 
+//               row(l) * row(l+i) * col(r-1) 
+//               for all i -> [l+1, r))
 int optimalMult(int left, int right) 
 {
 	if(right > left && memo[left][right] == -1ll) {
 		if(right == (left+1)) {
 			memo[left][right] = 0;
-			row[left][right] = matrix[left][0];
-			col[left][right] = matrix[left][1];
 			pos[left][right] = 0;
 		}
 		else {
-			
+			FOR(pos, left+1, right) {
+				LL curVal = 
+					optimalMult(left, pos) + optimalMult(pos, right) +
+					matrix[left][0] * matrix[pos][0] * matrix[right-1][1];
+				if(curVal < memo[left][right]) {
+					memo[left][right] = curVal;
+					pos[left][right] = pos;
+				}
+			}
 		}
 	}
 	return memo[left][right];
