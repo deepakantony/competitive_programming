@@ -47,12 +47,11 @@ int main(int argc, char *argv[])
 		while(true)
 		{
 			scanf(" %[^\n]s", input);
-			sscanf(input, " %d", &curVertex);
+			char *tok = strtok(input, " ");
+			curVertex = atoi(tok);
 			if(curVertex == 0) break;
-			int len = strlen(input);
-			int connectedNode;
-			for(int i = 2; i < len; i+=2) {
-				sscanf(input+i, " %d", &connectedNode);
+			while( (tok = strtok(NULL, " ")) ) {
+				int connectedNode = atoi(tok);
 				G[connectedNode-1].push_back(curVertex-1);
 				G[curVertex-1].push_back(connectedNode-1);
 			}
@@ -65,8 +64,8 @@ int main(int argc, char *argv[])
 			}*/
 
 		dfsNum = VI(N, 0);
-		dfsLow = VI(N);
-		dfsParent = VI(N);
+		dfsLow = VI(N, 0);
+		dfsParent = VI(N, 0);
 		dfsNumIndex = 1;
 		articulationVertex = VI(N, 0);
 		dfsRoot = 0;
