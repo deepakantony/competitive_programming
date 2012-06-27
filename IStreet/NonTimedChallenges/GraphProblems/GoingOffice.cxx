@@ -25,5 +25,8 @@ void dijkstraSSSP(const VVPII &G,  // adj list
 				  VI &distance,
 				  VI &path)
 {
-	PQ
+	distance = VI(G.size(), -1);
+	path = VI(G.size(), -1);
+	
+	PQPII
 }
