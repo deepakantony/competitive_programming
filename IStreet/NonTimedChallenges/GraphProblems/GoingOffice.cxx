@@ -70,10 +70,13 @@ void dijkstraSSSP(const VVPII &G,  // adj list
 void pathFromStoD(const int source, 
 				  const int _dest, 
 				  const VI &backtrack,
-				  VI &StoD) 
+				  VI &StoD, // this will only contain the vertices that belong to the path
+				  VI &StoD2) // this will contain all vertices but marker for vertices that belong to the path
 {
 	int dest = _dest;
 	stack<int> st;
+	StoD.clear();
+	StoD2 = VI(backtrack.size(), -1);
 	while(backtrack[dest] != -1 ) {
 		st.push(dest);
 		if(dest == source) break;
@@ -82,6 +85,7 @@ void pathFromStoD(const int source,
 	
 	while(!st.empty()) {
 		StoD.push_back(st.top());
+		StoD2[st.top()] = backtrack[st.top()];
 		st.pop();
 	}
 }
@@ -99,10 +103,19 @@ void identifyPathIndex(const VI &path,
 		if(backtrack[bt] == -1)
 			pathIndex[i] == -1;
 		else {
-			while(pathIndex[bt] == -1) {
+			stack<int> st;
+			while(pathIndex[bt] == -1 && bt != backtrack[bt]) {
+				st.push(bt);
 				bt = backtrack[bt];
 			}
+//			if(bt == backtrack[bt])
+//				pathIndex[i] = bt;
+//			else
 			pathIndex[i] = pathIndex[bt];
+			while(!st.empty()) {
+				pathIndex[st.top()] = pathIndex[i];
+				st.pop();
+			}
 		}
 	}
 }
@@ -184,20 +197,6 @@ int main(int argc, char *argv[])
 	dijkstraSSSP(G, source, distToSource, pathFromSource);
 	fprintf(stderr, "Dijkstras from destination.\n");
 	dijkstraSSSP(G, destination, distToDestination, pathFromDestination);
-	VI shortestPath;
-	fprintf(stderr, "Construct path from source to destination.\n");
-	pathFromStoD(source, destination, pathFromSource, shortestPath);
-	VI pathIndex;
-	fprintf(stderr, "Identify path index for each vertex.\n");
-	identifyPathIndex(shortestPath, pathFromSource, pathIndex);
-	vector<VPIPII> mincut;
-	fprintf(stderr, "Find mincuts.\n");
-	prepareMinCuts(G, pathIndex, shortestPath, mincut);
-	VI cacheShortestPath;
-	fprintf(stderr, "Prepare cache for shortest path\n");
-	prepareCache(source, destination, distToSource, distToDestination,
-				 mincut, pathIndex, cacheShortestPath);
-
 	fprintf(stderr, "Distance to source: ");
 	errPrint(distToSource);
 	fprintf(stderr, "Path from source: ");
@@ -206,10 +205,32 @@ int main(int argc, char *argv[])
 	errPrint(distToDestination);
 	fprintf(stderr, "Path from destination: ");
 	errPrint(pathFromDestination);
+
+
+	VI shortestPath, spBacktrack;
+	fprintf(stderr, "Construct path from source to destination.\n");
+	pathFromStoD(source, destination, pathFromSource, 
+				 shortestPath, spBacktrack);
 	fprintf(stderr, "Shortest path: ");
 	errPrint(shortestPath);
+	fprintf(stderr, "Shortest path backtrack: ");
+	errPrint(spBacktrack);
+
+	VI pathIndex;
+	fprintf(stderr, "Identify path index for each vertex.\n");
+	identifyPathIndex(shortestPath, pathFromSource, pathIndex);
 	fprintf(stderr, "Path Index: ");
 	errPrint(pathIndex);
+
+
+	vector<VPIPII> mincut;
+	fprintf(stderr, "Find mincuts.\n");
+	prepareMinCuts(G, pathIndex, shortestPath, mincut);
+	VI cacheShortestPath;
+	fprintf(stderr, "Prepare cache for shortest path\n");
+	prepareCache(source, destination, distToSource, distToDestination,
+				 mincut, pathIndex, cacheShortestPath);
+
 	fprintf(stderr, "Cache shortest path: ");
 	errPrint(cacheShortestPath);
 	
@@ -217,14 +238,16 @@ int main(int argc, char *argv[])
 	scanf(" %d", &numOfQueries);
 	REP(edge, numOfQueries) {
 		scanf(" %d %d", &u, &v);
-//		fprintf(stderr, "%d %d\n", u, v);
 
 		if(pathFromSource[u] == v) swap(u,v);
-		if(pathFromSource[v] == u && pathIndex[u] == u && pathIndex[v] == v) {
-			if(cacheShortestPath[u] == -1) 
+
+		if(pathFromSource[v] == u && 
+		   shortestPath[pathIndex[u]] == u &&
+		   shortestPath[pathIndex[v]] == v) {
+			if(cacheShortestPath[pathIndex[u]] == -1) 
 				printf("Infinity\n");
 			else
-				printf("%d\n", cacheShortestPath[u]);
+				printf("%d\n", cacheShortestPath[pathIndex[u]]);
 		}
 		else if(distToSource[destination] == -1)
 			printf("Infinity\n");
