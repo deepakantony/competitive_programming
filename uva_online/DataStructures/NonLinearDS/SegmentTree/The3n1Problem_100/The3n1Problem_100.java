@@ -3,7 +3,7 @@ import java.util.*;
 import java.lang.Math;
 import java.io.*;
 
-class the3n1problem
+class The3n1Problem_100
 {
 	public static void main(String[] args) {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -73,8 +73,8 @@ class SegmentTree {
 	private long calculateCycleLen(long n) {
 		if(n < 0) return 0;
 		if(n > 1000000) {
-			if(n%2 == 0) return calculateCycleLen(n>>1);
-			else return calculateCycleLen(3*n+1);
+			if(n%2 == 0) return 1+calculateCycleLen(n>>1);
+			else return 1+calculateCycleLen(3*n+1);
 		}
 		else {
 			if(maxCycle[(int)n] != 0) return maxCycle[(int)n];
