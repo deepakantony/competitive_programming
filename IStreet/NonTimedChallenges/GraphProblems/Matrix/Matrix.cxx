@@ -22,7 +22,7 @@ typedef queue<int> QI;
 #define FOR(i, s, n) for(int i = (s); i < (n); ++i)
 #define pb push_back
 #define mp make_pair
-#define INF 1000000000
+#define INF 10000000000
 
 int main(int argc, char *argv[])
 {
@@ -32,73 +32,77 @@ int main(int argc, char *argv[])
 
 	VVIL G(N);
 	int u, v;  vlong w;
-	REP(edge, N-1) 
-		scanf(" %d %d %d", &u, &v, &w), G[u].pb(mp(v,w)), G[v].pb(mp(u,w));
+	REP(edge, N-1) {
+		scanf(" %d %d %llu", &u, &v, &w); 
+		G[u].pb(mp(v,w));
+		G[v].pb(mp(u,w));
+	}
 
 	VI parents(N, -1);
 	VL weights(N, INF);
+
 	QI Q; Q.push(0); 
 	parents[0] = 0;
 	weights[0] = INF;
 	while(!Q.empty()) {
 		u = Q.front(); Q.pop();
 		REP(j, G[u].size()) {
-			v = G[u][v].first;
-			w = G[u][v].second;
-			if(parents[v] == -1)
-				Q.push(v), parents[v] = u, weights[v] = w;
+			v = G[u][j].first;
+			w = G[u][j].second;
+			if(parents[v] == -1) {
+				Q.push(v); parents[v] = u; weights[v] = w;
+			}
 		}
 	}
+	REP(i, weights.size()) fprintf(stderr, "%llu ", weights[i]);
+	fprintf(stderr, "\n");
 
 	VI machines(N, 0);
-	REP(machine, K) scanf(" %d", &u), machines[machine] = 1;
+	QI mQ; //machine q
+	REP(m, K) { scanf(" %d", &u); machines[u] = 1; mQ.push(u); }
 
-	vlong timeReq = 0;
-	VL minTimeVert(N, INF);
-	VI minTimeEdge(N, -1);
-	REP(k, N) if(machine[k]) {
-		// now trace back till the root or a node with time updated.
+	vlong res = 0;
+	VL minWeightVert(N, INF);
+	while(!mQ.empty()) {
+		u = mQ.front(); mQ.pop();
+		int p = parents[u];
 
-		int curVert = k;
-		minTimeEdge[curVert] = curVert;
-		minTimeVert[curVert] = weights[curVert];
-		while(curVert != parents[curVert]) {
-			int p = parents[curVert];
+		fprintf(stderr, "%d -> ", u);
+		while(p != u) {
+			fprintf(stderr, "%d ->", p);
+			vlong minWeight = min(minWeightVert[u], weights[u]);
 
-			// reached a machine; remove the shortest edge
+			// reached another machine
 			if(machines[p]) {
-				int updateVertex = minTimeEdge[curVert];
-				timeReq += minTimeVert[curVert];
-				parents[updateVertex] = updateVertex;
-				weights[updateVertex] = INF;
+				res += minWeight; 
 				break;
 			}
 
-			// reached a visited vertex; remove the shorter of the two edges
-			if(minTimeVert[p] != INF) {
-				if(minTimeVert[p] > minTimeVert[curVert]) {
-					int updateVertex = minTimeEdge[curVert];
-					timeReq += minTimeVert[curVert];
-					parents[updateVertex] = updateVertex;
-					weights[updateVertex] = INF;
+			if(G[p].size() > 2 && minWeightVert[p] == INF) {
+				minWeightVert[p] = minWeight; 
+				mQ.push(p);
+				break;
+			}
+
+			if(minWeightVert[p] != INF) {
+				if(minWeight > minWeightVert[p]) {
+					res += minWeightVert[p];
+					minWeightVert[p] = minWeight;
 				}
 				else {
-					
+					res += minWeight;
 				}
+				break;
 			}
 			
-			if(minTimeVert[curVert] > weights[p]) {
-				minTimeVert[p] = weights[p];
-				minTimeEdge[p] = minTimeEdge[curVert];
-			}
-			else {
-				minTimeVert[p] = minTimeVert[curVert];
-				minTimeEdge[p] = minTimeEdge[curVert];
-			}
+			minWeightVert[p] = minWeight;
 
-			curVert = p;
+			u = p;
+			p = parents[u];
 		}
+		fprintf(stderr, "RES: %llu\n", res);
 	}
 
+	printf("%llu\n", res);
 	return 0;
 }
