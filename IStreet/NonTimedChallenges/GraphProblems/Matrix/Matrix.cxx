@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdlib>
 #include <algorithm>
 #include <vector>
 #include <utility>
@@ -38,12 +39,18 @@ int main(int argc, char *argv[])
 		G[v].pb(mp(u,w));
 	}
 
+	VI machines(N, 0);
+	QI mQ; //machine q
+	REP(m, K) { scanf(" %d", &u); machines[u] = 1; mQ.push(u); }
+
+
 	VI parents(N, -1);
 	VL weights(N, INF);
+	u = rand()%N;
 
-	QI Q; Q.push(0); 
-	parents[0] = 0;
-	weights[0] = INF;
+	QI Q; Q.push(u);
+	parents[u] = u;
+	weights[u] = INF;
 	while(!Q.empty()) {
 		u = Q.front(); Q.pop();
 		REP(j, G[u].size()) {
@@ -54,12 +61,9 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-	REP(i, weights.size()) fprintf(stderr, "%llu ", weights[i]);
-	fprintf(stderr, "\n");
+//	REP(i, weights.size()) fprintf(stderr, "%llu ", weights[i]);
+//	fprintf(stderr, "\n");
 
-	VI machines(N, 0);
-	QI mQ; //machine q
-	REP(m, K) { scanf(" %d", &u); machines[u] = 1; mQ.push(u); }
 
 	vlong res = 0;
 	VL minWeightVert(N, INF);
@@ -67,9 +71,9 @@ int main(int argc, char *argv[])
 		u = mQ.front(); mQ.pop();
 		int p = parents[u];
 
-		fprintf(stderr, "%d -> ", u);
+//		fprintf(stderr, "%d -> ", u);
 		while(p != u) {
-			fprintf(stderr, "%d ->", p);
+//			fprintf(stderr, "%d ->", p);
 			vlong minWeight = min(minWeightVert[u], weights[u]);
 
 			// reached another machine
@@ -100,7 +104,7 @@ int main(int argc, char *argv[])
 			u = p;
 			p = parents[u];
 		}
-		fprintf(stderr, "RES: %llu\n", res);
+//		fprintf(stderr, "RES: %llu\n", res);
 	}
 
 	printf("%llu\n", res);
