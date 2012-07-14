@@ -1,3 +1,19 @@
+// the solution is based on the fact that the given graph is a tree. So, there
+// are no cycles. Let us pick a random city as the root of this tree. Using 
+// using this root, we'll construct a parent array using bfs that will lead
+// all nodes to the root. Now, we start with a node where a machine is located.
+// Now we start a walk to the parent keeping track of the smallest edge; if 
+// we reach a machine on the way we stop and cut the smallest edge and move
+// to the next node and start the walk. If we reach a node that has more than
+// 2 edges i.e. it probably has one more branch and the branch that we don't 
+// walk to might have a machine. Because of this, we stop here and add this
+// node to the queue. We use a priority queue based on the distance of the 
+// node from the root; this enables us to walk the farthest machine nodes first,
+// so that, any node with more than 2 edges can be delt with before those nodes,
+// start walking again.
+
+// I'm really hopeless at explaining, check the code for details.
+
 #include <cstdio>
 #include <cstdlib>
 #include <algorithm>
