@@ -39,36 +39,37 @@ int main(int argc, char *argv[])
 		G[v].pb(mp(u,w));
 	}
 
-	VI machines(N, 0);
-	QI mQ; //machine q
-	REP(m, K) { scanf(" %d", &u); machines[u] = 1; mQ.push(u); }
 
 
 	VI parents(N, -1);
 	VL weights(N, INF);
+	VI dist(N, -1);
 	u = rand()%N;
 
 	QI Q; Q.push(u);
 	parents[u] = u;
 	weights[u] = INF;
+	dist[u] = 0;
 	while(!Q.empty()) {
 		u = Q.front(); Q.pop();
 		REP(j, G[u].size()) {
 			v = G[u][j].first;
 			w = G[u][j].second;
 			if(parents[v] == -1) {
-				Q.push(v); parents[v] = u; weights[v] = w;
+				Q.push(v); parents[v] = u; weights[v] = w; dist[v] = dist[u]+1;
 			}
 		}
 	}
 //	REP(i, weights.size()) fprintf(stderr, "%llu ", weights[i]);
 //	fprintf(stderr, "\n");
-
+	VI machines(N, 0);
+	priority_queue<II> mQ; //machine q
+	REP(m, K) { scanf(" %d", &u); machines[u] = 1; mQ.push(mp(dist[u], u)); }
 
 	vlong res = 0;
 	VL minWeightVert(N, INF);
 	while(!mQ.empty()) {
-		u = mQ.front(); mQ.pop();
+		u = mQ.top().second; mQ.pop();
 		int p = parents[u];
 
 //		fprintf(stderr, "%d -> ", u);
@@ -84,7 +85,7 @@ int main(int argc, char *argv[])
 
 			if(G[p].size() > 2 && minWeightVert[p] == INF) {
 				minWeightVert[p] = minWeight; 
-				mQ.push(p);
+				mQ.push(mp(dist[p], p));
 				break;
 			}
 
