@@ -48,12 +48,9 @@ public:
 		return false;
 	}
 
-	float median() {
+	T getElementAt(int index) {
 		assert(root != NULL);
-		int mid = size/2;
-		if(root->size % 2 == 0)
-			return (float)(median(root, mid) + median(root, mid+1))/2.f;
-		else return median(root, mid);
+		return getElementAt(root, index);
 	}
 private:
 	void add(Node<T> *cur, const T &data) {
@@ -85,11 +82,63 @@ private:
 
 	void remove(Node<T> *toDelete) {
 		if(toDelete == NULL) return;
-		if(toDelete->count > 1) { toDelete->count--; return; }
+		if(toDelete->count > 1) { 
+			toDelete->count--; updateSizeAndHeight(toDelete); 
+			return; 
+		}
 
 		assert(toDelete->count == 1);
 
-		
+		// the toDelete node does not have any child
+		if(toDelete->left == NULL && toDelete->right == NULL) {
+			if(toDelete == root) root = NULL;
+			else if(toDelete->parent->left == toDelete)
+				toDelete->parent->left = NULL;
+			else toDelete->parent->right = NULL;
+		}
+
+		// the toDelete node does not have left child
+		else if(toDelete->left == NULL) {
+			if(toDelete == root) {
+				root = toDelete->right;
+				root->parent = NULL;
+			}
+			else if(toDelete == toDelete->parent->left) {
+				toDelete->parent->left = toDelete->right;
+				toDelete->right->parent = toDelete->parent;
+			}
+			else {
+				toDelete->parent->right = toDelete->right;
+				toDelete->right->parent = toDelete->parent;
+			}
+		}
+
+		// the toDelete node does not have right child
+		else if(toDelete->right == NULL) {
+			if(toDelete == root) {
+				root = toDelete->left;
+				root->parent = NULL;
+			}
+			else if(toDelete == toDelete->parent->left) {
+				toDelete->parent->left = toDelete->left;
+				toDelete->left->parent = toDelete->parent;
+			}
+			else {
+				toDelete->parent->right = toDelete->left;
+				toDelete->left->parent = toDelete->parent;
+			}
+		}
+		else {
+
+			// both subtrees exist;
+			// find the largest element in the left node and exchange and 
+			// delete
+			Node<T> *largestInLeftNode = largest(toDelete->left);
+			
+		}
+
+		updateTillRoot(toDelete->parent);
+		delete toDelete;
 	}
 
 	Node<T> *findNodeWithValue(Node<T> *cur, const T &data) {
@@ -98,14 +147,21 @@ private:
 		return cur;
 	}
 
-	T median(Node<T> *cur, int index) {
-		int curLow = 1;
+	T getElementAt(Node<T> *cur, int index) {
+		assert(cur != NULL);
+		assert(index > 0);
+		int curLow = 0;
 		if(cur->left) curLow += cur->left->size;
-		if(index >= curLow && index < curLow+cur->size) return cur->data;
+		if(index > curLow && index <= curLow+cur->count) return cur->data;
 
-		
+		if(index <= curLow) return getElementAt(cur->left, index);
+		return getElementAt(cur->right, index - curLow - cur->count);
 	}
-	
+
+	Node<T> *largest(Node<T> *cur) {
+		if(cur->right == NULL) return cur;
+		largest(cur->right);
+	}
 
 	int heightDiff(Node<T> *node1, Node<T> *node2) {
 		if(node1 && node2) return node1->height - node2->height;
@@ -160,6 +216,6 @@ private:
 int main(int argc, char *argv[])
 {
 	BST<int> avltree;
-	avltree.median();
+	avltree.median(10);
 	return 0;
 }
