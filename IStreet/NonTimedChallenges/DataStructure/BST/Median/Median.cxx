@@ -5,10 +5,14 @@
 
 using namespace std;
 
+#define REP(i, n) for(int i = 0; i < (n); ++i)
+
 template<typename T>
 struct Node {
 	Node(const T& _data, Node<T> *p) : left(NULL), right(NULL), parent(p), 
-						   data(_data), size(1), count(1), height(0) {}
+									   data(_data), count(1), size(1),
+									   height(0) {}
+
 	void updateSizeAndHeight() {
 		// update size
 		size = count;
@@ -32,11 +36,12 @@ class BST {
 public:
 	BST() : root(NULL) {}
 
-	int size() { root == NULL ? 0 : root.size(); }
+	int size() { return root == NULL ? 0 : root->size; }
 
 	void add(const T &data) {
-		if(root == NULL) root = new Node<T>(data, NULL);
+		if(root == NULL) root = new Node<T>(data, NULL); 
 		else add(root, data);
+		assert(root != NULL);
 	}
 
 	bool remove(const T &data) {
@@ -50,6 +55,7 @@ public:
 
 	T getElementAt(int index) {
 		assert(root != NULL);
+		assert(index > 0 && index <= size());
 		return getElementAt(root, index);
 	}
 private:
@@ -62,22 +68,7 @@ private:
 		else if(cur->left == NULL) cur->left = new Node<T>(data, cur);
 		else add(cur->left, data);
 
-		int balanceFactor = heightDiff(cur->left, cur->right);
-		assert(balanceFactor < 3 && balanceFactor > -3);
-		if(balanceFactor == 2) { // left subtree heavy
-			int balanceFactorL = heightDiff(cur->left->left, cur->left->right);
-			if(balanceFactorL < 0) // right heavy
-				rotateLeft(cur->left);
-			rotateRight(cur);
-		}
-		else if(balanceFactor == -2) {
-			int balanceFactorR = heightDiff(cur->right->left, cur->right->left);
-			if(balanceFactorR > 0) // left heavy
-				rotateRight(cur->right);
-			rotateLeft(cur);
-		}
-
-		cur->updateSizeAndHeight();
+		balance(cur);
 	}
 
 	void remove(Node<T> *toDelete) {
@@ -146,7 +137,7 @@ private:
 					largestInLeftNode->left->parent = toDelete;
 			}
 			swap(largestInLeftNode->data, toDelete->data);
-			
+			toDelete = largestInLeftNode;
 		}
 
 		updateTillRoot(toDelete->parent);
@@ -220,14 +211,55 @@ private:
 		else { root = oldleft; root->parent = NULL; }
 	}
 
+	void balance(Node<T> *cur) {
+		int balanceFactor = heightDiff(cur->left, cur->right);
+		assert(balanceFactor < 3 && balanceFactor > -3);
+		if(balanceFactor == 2) { // left subtree heavy
+			int balanceFactorL = heightDiff(cur->left->left, cur->left->right);
+			if(balanceFactorL < 0) // right heavy
+				rotateLeft(cur->left);
+			rotateRight(cur);
+		}
+		else if(balanceFactor == -2) {
+			int balanceFactorR = heightDiff(cur->right->left, cur->right->left);
+			if(balanceFactorR > 0) // left heavy
+				rotateRight(cur->right);
+			rotateLeft(cur);
+		}
+
+		cur->updateSizeAndHeight();
+	}
+
+	void updateTillRoot(Node<T> *cur) {
+		if(cur != NULL) {
+			balance(cur);
+			updateTillRoot(cur->parent);
+		}
+	}
+
 private:
 	Node<T> *root;
 };
 
 
+void unittests() {
+	int testlist[] = {1,1,1,2,2,3,4,5,6,7,8,9,10,10,11};
+	int size = sizeof(testlist)/sizeof(int);
+	BST<int> tree;
+	REP(i, size) {
+
+		tree.add(testlist[i]);
+
+		assert(tree.size() == i+1);
+		printf("%d %d %d %d\n", i, testlist[i], tree.size(), tree.getElementAt(i+1));
+		assert(tree.getElementAt(i+1) == testlist[i]);
+	}
+		
+}
+
+
 int main(int argc, char *argv[])
 {
-	BST<int> avltree;
-	avltree.median(10);
+	unittests();
 	return 0;
 }
