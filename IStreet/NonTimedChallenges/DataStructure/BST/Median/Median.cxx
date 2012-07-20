@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <cmath>
 #include <cassert>
+#include <vector>
+#include <ctime>
 
 using namespace std;
 
@@ -19,10 +21,10 @@ struct Node {
 		if(right) size += right->size;
 		if(left) size += left->size;
 
-		// update balfactor
+		// update height
 		height = 0;
-		if(right) height = max(height, right->height);
-		if(left) height = max(height, left->height);
+		if(right) height = max(height, right->height+1);
+		if(left) height = max(height, left->height+1);
 	}
 	Node<T> *left, *right, *parent;
 	T data;
@@ -58,23 +60,42 @@ public:
 		assert(index > 0 && index <= size());
 		return getElementAt(root, index);
 	}
+
+	void inorderPrint() {
+		inorder(root);
+		printf("\n");
+	}
+	void inorder(Node<T> *cur){
+		if(cur!=NULL) {
+			printf(" [ ");
+			inorder(cur->left);
+			if(cur->left) printf("<-");
+			printf(" %d ", cur->data);
+			if(cur->right) printf("->");
+			inorder(cur->right);
+			printf(" ] ");
+		}
+	}
+		
 private:
 	void add(Node<T> *cur, const T &data) {
+		assert(cur != NULL);
 		if(cur->data == data) { cur->size++; cur->count++; return; }
 
-		if(cur->data < data) // data is greater
+		if(cur->data < data) { // data is greater
 			if(cur->right == NULL) cur->right = new Node<T>(data, cur); 
 			else add(cur->right, data);
+		}
 		else if(cur->left == NULL) cur->left = new Node<T>(data, cur);
 		else add(cur->left, data);
 
-		balance(cur);
+		updateTillRoot(cur);
 	}
 
 	void remove(Node<T> *toDelete) {
 		if(toDelete == NULL) return;
 		if(toDelete->count > 1) { 
-			toDelete->count--; updateSizeAndHeight(toDelete); 
+			toDelete->count--; updateTillRoot(toDelete); 
 			return; 
 		}
 
@@ -174,11 +195,12 @@ private:
 	}
 
 	void rotateLeft(Node<T> *p) {
+		//fprintf(stderr, "Rotate Left\n");
 		assert(p!=NULL);
 		if(p->right == NULL) return;
 
 		Node<T> *oldright = p->right;
-		p->right = p->right->left;
+		p->right = oldright->left;
 		if(p->right) p->right->parent = p;
 		oldright->left = p;
 		oldright->parent = p->parent;
@@ -190,14 +212,17 @@ private:
 			else oldright->parent->right = oldright;
 		}
 		else { root = oldright; root->parent = NULL; }
+		p->updateSizeAndHeight();
+		oldright->updateSizeAndHeight();
 	}
 
 	void rotateRight(Node<T> *p) {
+		//fprintf(stderr, "Rotate Right\n");
 		assert(p!=NULL);
 		if(p->left == NULL) return;
 
 		Node<T> *oldleft = p->left;
-		p->left = p->left->right;
+		p->left = oldleft->right;
 		if(p->left) p->left->parent = p;
 		oldleft->right = p;
 		oldleft->parent = p->parent;
@@ -209,11 +234,17 @@ private:
 			else oldleft->parent->right = oldleft;
 		}
 		else { root = oldleft; root->parent = NULL; }
+		p->updateSizeAndHeight();
+		oldleft->updateSizeAndHeight();
 	}
 
 	void balance(Node<T> *cur) {
+		cur->updateSizeAndHeight();
 		int balanceFactor = heightDiff(cur->left, cur->right);
-		assert(balanceFactor < 3 && balanceFactor > -3);
+
+		//fprintf(stderr,"BALANCEFACTOR: %d", balanceFactor);
+
+		assert(balanceFactor > -3 && balanceFactor < 3);
 		if(balanceFactor == 2) { // left subtree heavy
 			int balanceFactorL = heightDiff(cur->left->left, cur->left->right);
 			if(balanceFactorL < 0) // right heavy
@@ -239,27 +270,84 @@ private:
 
 private:
 	Node<T> *root;
+	friend void unittests();
 };
 
 
 void unittests() {
-	int testlist[] = {1,1,1,2,2,3,4,5,6,7,8,9,10,10,11};
-	int size = sizeof(testlist)/sizeof(int);
-	BST<int> tree;
+	//int testlist[] = {1,1,1,2,2,3,4,5,6,7,8,9,10,10,11};
+	//int testlist[] = {2, 4, 9, 8, 6, 7};
+	srand(time(NULL));
+	vector<int> testlist;
+	REP(i, 1000000){
+		testlist.push_back(rand()%10000);
+	}
+	int size = testlist.size(); 
+	//int size = sizeof(testlist)/sizeof(int);
+	BST<int> tree;	
 	REP(i, size) {
-
+		//tree.inorderPrint();
 		tree.add(testlist[i]);
+		//if(tree.root)
+		//fprintf(stderr,	"%d %d\n",tree.root->height, tree.root->size);
 
 		assert(tree.size() == i+1);
-		printf("%d %d %d %d\n", i, testlist[i], tree.size(), tree.getElementAt(i+1));
+		//printf("%d %d %d %d\n", i, testlist[i], tree.size(), tree.getElementAt(i+1));
+		//assert(tree.getElementAt(i+1) == testlist[i]);
+	}
+	//fprintf(stderr, "Done creating the tree\n");
+	sort(testlist.begin(), testlist.end());
+	//sort(testlist, testlist+size);
+	REP(i, size) {
 		assert(tree.getElementAt(i+1) == testlist[i]);
 	}
-		
+
+	REP(i, size) {
+		assert(tree.remove(i+10001) == false);
+
+		assert(tree.getElementAt(size-i) == testlist[size-i-1]);
+		assert(tree.remove(testlist[size-i-1]));
+		assert(tree.size() == (size-i-1));
+		if(i != size-1)
+			assert(tree.getElementAt(size-i-1) == testlist[size-i-2]);
+
+	}
+
+	
 }
 
+void solveMedian() {
+	int N;
+	char op;
+	int num;
+	scanf(" %d", &N);
+	BST<int> tree;
+	bool printMedian;
+	while(N--) {
+		scanf(" %c %d", &op, &num);
+		if(op == 'a') {
+			tree.add(num);
+			printMedian = true;
+		}
+		else printMedian = tree.remove(num);
+
+		if(tree.size() == 0) printMedian = false;
+		if(printMedian) {
+			if(tree.size() % 2 == 0) {
+				unsigned int sum = tree.getElementAt(tree.size()/2) + 
+					tree.getElementAt(tree.size()/2+1);
+				if(sum%2==0) printf("%u\n", sum/2);
+				else printf("%u.5\n", sum/2);
+			}
+			else printf("%d\n", tree.getElementAt((tree.size()/2)+1));
+		}
+		else printf("Wrong!\n");
+	}
+}
 
 int main(int argc, char *argv[])
 {
-	unittests();
+	//unittests();
+	solveMedian();
 	return 0;
 }
