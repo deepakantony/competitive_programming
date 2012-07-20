@@ -313,7 +313,13 @@ void unittests() {
 
 	}
 
-	
+	REP(i,size) {
+		if(rand()%2)
+			tree.add(testlist[i]);
+		else tree.remove(testlist[i]);
+		if(tree.size() > 0)
+			tree.getElementAt(tree.size()/2 + 1);
+	}
 }
 
 void solveMedian() {
@@ -347,7 +353,7 @@ void solveMedian() {
 
 int main(int argc, char *argv[])
 {
-	//unittests();
-	solveMedian();
+	unittests();
+	//solveMedian();
 	return 0;
 }
