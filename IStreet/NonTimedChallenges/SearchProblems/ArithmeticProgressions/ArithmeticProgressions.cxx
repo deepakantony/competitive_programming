@@ -31,17 +31,22 @@ LL modularPow(LL base, LL exponent) {
 
 struct STNode {
 	STNode(int l, int m, int h, STNode *_l, STNode *_r)
-		: low(l), mid(m), high(h), left(_l), right(_r), update(0) {
+		: low(l), mid(m), high(h), left(_l), right(_r), upd(0) {
 		K = left->K+right->K;
 		V = MODMUL(left->V, right->V);
 	}
-	STNode(int l, int m, int h, int k, int v)
-		: low(l), mid(m), high(h), K(k), V(v), update(0), left(0), right(0) {
+	STNode(int l, int m, int h, LL _d, LL _p)
+		: low(l), mid(m), high(h), d(_d), K(_p), upd(0), left(0), right(0) {
+		V = MODMUL(d,K);
+	}
+	void update(LL _upd){
+		K += _upd;
+		upd = 0;
+		V = MODMUL(d,K);
 	}
 
 	int low, mid, high;
-	LL K, V;
-	int update;
+	LL K, V, upd, d;
 	STNode *left, *right;
 };
 
@@ -50,7 +55,9 @@ public:
 	SegmentTree(STNode *_leaves, int _size) 
 		: leaves(_leaves), size(_size) { root = build(0, size-1); }
 
-	void update(int low, int high, LL upd) {}
+	void update(int low, int high, LL upd) {
+		update(root, low, high, upd);
+	}
 	void query(int low, int high, LL &K, LL &V) {}
 
 private:
@@ -59,12 +66,23 @@ private:
 		if(low == high) cur = &leaves[low];
 		else {
 			int mid = (low+high)/2;
-			cur = new Node(low, mid, high, 0, 0);
-			cur->left = build(low, mid);
-			cur->right = build(mid+1, high);
+			cur = new STNode(low, mid, high, 
+							 build(low, mid), 
+							 build(mid+1, high)); 
 		}
 		return cur;
 	}
+
+	void update(STNode *cur, int low, int high, LL upd) {
+		if(cur->low == low && cur->high == high && low == high) 
+			cur->update(upd);
+		else if(cur->low == low && cur->high == high) 
+			cur->upd += upd;
+		else {
+			
+		}
+	}
+	
 
 private:
 	STNode *root;
