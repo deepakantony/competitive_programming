@@ -78,10 +78,11 @@ void constructSumBoard() {
 
 		for(int j = startj; j < newN; ++j) {
 			sumBoard[i][j] = memo[i][j];
-            if(j > 0) sumBoard[i][j] = (sumBoard[i][j] + sumBoard[i][j-1])%mod;
-            if(i > 0) sumBoard[i][j] = (sumBoard[i][j] + sumBoard[i-1][j])%mod;
+            if(j > 0) sumBoard[i][j] += sumBoard[i][j-1];
+            if(i > 0) sumBoard[i][j] += sumBoard[i-1][j];
 			if(j > 0 && i > 0) 
-				sumBoard[i][j] = modme(sumBoard[i][j] - sumBoard[i-1][j-1]);
+				sumBoard[i][j] -= sumBoard[i-1][j-1];
+			sumBoard[i][j] = modme(sumBoard[i][j]);
 		}
 
 	}
@@ -90,19 +91,22 @@ void constructSumBoard() {
 // Recalculate the board values based on the partial sums
 void recalculateResultBoard() {
 	int x_s_1, y_s_1, xs, ys;
+	LL sub;
 	REP(x, newN) {
         for(int y = startIndex[x]; y < endIndex[x]; y+=2) 
             if(origBoard[x][y] == 1) {
 				xs = min(newN-1,x+S);
 				ys = min(newN-1, y+S);
 				x_s_1 = x-S-1, y_s_1 = y-S-1;
+				sub = 0;
                 memo[x][y] = sumBoard[xs][ys];
                 if(x_s_1 >= 0 && y_s_1 >= 0)
-                    memo[x][y] = (memo[x][y] + sumBoard[x_s_1][y_s_1])%mod;
+                    memo[x][y] += sumBoard[x_s_1][y_s_1];
                 if(x_s_1 >= 0) 
-                    memo[x][y] = modme(memo[x][y] - sumBoard[x_s_1][ys]);
+                    sub += sumBoard[x_s_1][ys];
                 if(y_s_1 >= 0)
-                    memo[x][y] = modme(memo[x][y] - sumBoard[xs][y_s_1]);
+                    sub += sumBoard[xs][y_s_1];
+				memo[x][y] = modme(memo[x][y]-sub);
 			}
 	}
 }
