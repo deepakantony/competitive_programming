@@ -15,37 +15,31 @@ def initNCR(N):
 def solveGridWalking(N,M,dimension,startLocation):
     # For dimension i, identify the number of ways I can move j steps in that
     # dimension.
-    nWays = []
-    for i in xrange(N):
-        nWays.append([0]*dimension[i])
-        memo = [[1]*dimension[i]]
-        for j in xrange(M):
-            memo.append([0]*dimension[i])
-            for pos in xrange(dimension[i]):
+    nWays = [[1]*(M+1)]
+    for i in xrange(1, N+1):
+        nWays.append([1]*(M+1))
+        memo = [[1]*dimension[i-1]]
+        for j in xrange(1, M+1):
+            memo.append([0]*dimension[i-1])
+            for pos in xrange(dimension[i-1]):
                 val = 0
-                if pos-1 >= 0: val += memo[j][pos-1]
-                if pos+1 < dimension[i]: val += memo[j][pos+1]
-                memo[j+1][pos] = val%mod
-            nWays[i][j] = memo[j+1][startLocation[i]]
+                if pos-1 >= 0: val += memo[j-1][pos-1]
+                if pos+1 < dimension[i-1]: val += memo[j-1][pos+1]
+                memo[j][pos] = val%mod
+            nWays[i][j] = memo[j][startLocation[i-1]]
 
-    memo = [[0]*M]
-    for step in xrange(M):
-        val = 0
-        for k in xrange(step+1):
-            val = (val + nWays[0][step-k]) % mod
-            
-        memo[0][step] = val
-
-    for dim in xrange(1, N):
-        memo.append([0]*M)
-        for step in xrange(M):
+    memo = [[1]*(M+1)]
+    for dim in xrange(1, N+1):
+        memo.append([1]*(M+1))
+        for step in xrange(1, M+1):
             val = 0
             for k in xrange(step+1):
                 val = (val + ((memo[dim-1][k] * nWays[dim][step-k])%mod
                               * ncr[step][step-k])%mod)%mod
+                print val
             memo[dim][step] = val
-
-    return memo[N-1][M-1]
+    print memo
+    return memo[N][M]
 
 def main():
     initNCR(300)
