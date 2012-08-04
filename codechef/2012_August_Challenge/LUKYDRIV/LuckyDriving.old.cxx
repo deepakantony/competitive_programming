@@ -49,7 +49,8 @@ int main(int argc, char *argv[])
 		if(total[3] > 2)
 			tripleNo0sND9s = modme(tripleNo0sND9s+ total[3]*(total[3]-1)*(total[3]-2)/6);
 		// 3 6's
-		
+		if(total[6] > 2)
+			tripleNo0sND9s = modme(tripleNo0sND9s+ total[6]*(total[6]-1)*(total[6]-2)/6);
 		// double 1's with a 7
 		if(total[1] > 1)
 			tripleNo0sND9s = modme(tripleNo0sND9s+ total[1]*(total[1]-1)*total[7]/2);
@@ -59,6 +60,16 @@ int main(int argc, char *argv[])
 		// double 4's with a 1
 		if(total[4] > 1)
 			tripleNo0sND9s = modme(tripleNo0sND9s+ total[4]*(total[4]-1)*total[1]/2);
+		// double 5's with a 8
+		if(total[5] > 1)
+			tripleNo0sND9s = modme(tripleNo0sND9s+ total[5]*(total[5]-1)*total[8]/2);
+		// double 7's with a 4
+		if(total[7] > 1)
+			tripleNo0sND9s = modme(tripleNo0sND9s+ total[7]*(total[7]-1)*total[4]/2);
+		// double 8's with a 2
+		if(total[8] > 1)
+			tripleNo0sND9s = modme(tripleNo0sND9s+ total[8]*(total[8]-1)*total[2]/2);
+
 		tripleDigit = modme(tripleDigit+tripleNo0sND9s);
 
 		// this is 9 with 9's
@@ -85,7 +96,15 @@ int main(int argc, char *argv[])
 		// triple 2's with 1's
 		LL triple2s = total[2] > 2? modme(total[2]*(total[2]-1)*(total[2]-2)/6) : 0;
 		quadDigit = modme(quadDigit + triple2s*total[1]);
-		
+		// triple 4's with 6's
+		LL triple4s = total[4] > 2? modme(total[4]*(total[4]-1)*(total[4]-2)/6) : 0;
+		quadDigit = modme(quadDigit + triple4s*total[6]);
+		// triple 5's with 3's
+		LL triple5s = total[5] > 2? modme(total[5]*(total[5]-1)*(total[5]-2)/6) : 0;
+		quadDigit = modme(quadDigit + triple5s*total[3]);
+		// triple 7's with 3's
+		LL triple5s = total[5] > 2? modme(total[5]*(total[5]-1)*(total[5]-2)/6) : 0;
+		quadDigit = modme(quadDigit + triple5s*total[3]);
 		
 	}
 	return 0;
