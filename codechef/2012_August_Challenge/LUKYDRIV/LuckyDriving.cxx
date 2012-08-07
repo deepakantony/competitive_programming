@@ -40,12 +40,32 @@ void initCountDigit() {
 		countDigit[S[i]-'0']++;
 }
 
+// This function checks if I can split the last element of curPartition and use the 
+// indivisableTotal to create a partition that doesn't exceed the splitvalue or
+// size of 4
+bool buildNextPartition(VI &p, int indivisableTotal) {
+	indivisableTotal++;
+	int splitPart1 = p.back()-1;
+
+	// next partition size
+	int npsize = p.size()+ (indivisableTotal%splitPart1 ? 1 : 0) + indivisableTotal/splitPart1;
+	if(npsize > 4) return false; 
+
+	// can split.. hurrah
+	p.pop_back();
+	p.push_back(splitPart1);
+	while(indivisableTotal>0) {
+		p.push_back(indivisableTotal >= splitPart1 ? splitPart1 : indivisableTotal);
+		indivisableTotal -= splitPart1;
+	}
+	return true;
+}
+
 // Given a partion, this function will find the next partion or return false
 // if it couldn't find one. This will create partion with only digits and does
 // not change the original sum. This will always create unique partitions not
 // created before.
 bool nextDigitPartition(const VI &prevDigitPartition, VI &next) {
-	printVec(prevDigitPartition);
 	next = VI(prevDigitPartition.begin(), prevDigitPartition.end());
 	// if the last element is 0, then remove it, that's the next partition
 	if(next.back() == 0) {
@@ -57,11 +77,14 @@ bool nextDigitPartition(const VI &prevDigitPartition, VI &next) {
 	while(next.back() == 1)
 		indivisableTotal++, next.pop_back();
 
+	while(!next.empty() && !buildNextPartition(next, indivisableTotal)) 
+		indivisableTotal += next.back(), next.pop_back();
+
+	if(next.empty()) return false;
 	
 	// At the end, if the length is not 4, add 0's :)
-	if(next.size() < 4)
+	while(next.size() < 4)
 		next.push_back(0);
-
 	assert(next.size() == 4);
 	return true;
 }
@@ -86,7 +109,7 @@ void generateDigitPartitions() {
 }
 
 // return nCr
-LL nCr(int n, int r) {
+LL nCr(LL n, LL r) {
 	LL res = 0;
 	if(r == 1) res = n;
 	else if(r == 2 && n > 1) res = modme(n*(n-1)/2);
@@ -112,13 +135,13 @@ LL totalWays(const VI &p) {
 		c[curIdx]++;
 		prev = p[i];
 	}
-	LL res = 0;
+	LL res = 1;
 	curIdx++;
 	REP(i, curIdx)
 		res = modme(res * nCr(countDigit[digits[i]], c[i]));
-		
-	printVec(p);
-	cout << res << endl;
+
+//	if(res > 0)
+//		printVec(p), cout << res << endl;
 	return res;
 }
 
@@ -136,7 +159,6 @@ int main(int argc, char *arv[]) {
 	while(T--) {
 		scanf("%s", S);
 		initCountDigit();
-		
 		printf("%lld\n", getTotalWays());
 	}
 	return 0;
