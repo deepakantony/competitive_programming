@@ -3,8 +3,8 @@
 #include <cstring>
 #include <vector>
 #include <utility>
-#include <iostream>
-#include <iterator>
+//#include <iostream>
+//#include <iterator>
 #include <cassert>
 
 using namespace std;
@@ -26,11 +26,11 @@ VVI digitPartition;
 int countDigit[10];
 char S[10010];
 
-template<typename T>
-void printVec(T &vec) {
-	copy(vec.begin(), vec.end(), ostream_iterator<int>(cout, " "));
-	cout << endl;
-}
+//template<typename T>
+//void printVec(T &vec) {
+//	copy(vec.begin(), vec.end(), ostream_iterator<int>(cout, " "));
+//	cout << endl;
+//}
 	
 
 // for the given string of digits, S, I find the count of each digit in it.
@@ -48,7 +48,8 @@ bool buildNextPartition(VI &p, int indivisableTotal) {
 	int splitPart1 = p.back()-1;
 
 	// next partition size
-	int npsize = p.size()+ (indivisableTotal%splitPart1 ? 1 : 0) + indivisableTotal/splitPart1;
+	int npsize = p.size()+ (indivisableTotal%splitPart1 ? 1 : 0) + 
+		indivisableTotal/splitPart1;
 	if(npsize > 4) return false; 
 
 	// can split.. hurrah
@@ -111,10 +112,11 @@ void generateDigitPartitions() {
 // return nCr
 LL nCr(LL n, LL r) {
 	LL res = 0;
+	assert(r>=1 && r<=4);
 	if(r == 1) res = n;
 	else if(r == 2 && n > 1) res = modme(n*(n-1)/2);
-	else if(r == 3 && n > 2) res = modme(modme(n*(n-1)/2)*(n-2)/3);
-	else if(r == 4 && n > 3) res = modme(modme(modme(n*(n-1)/2)*(n-2)/3)*(n-3)/4);
+	else if(r == 3 && n > 2) res = modme(n*(n-1)*(n-2)/6);
+	else if(r == 4 && n > 3) res = modme(n*(n-1)*(n-2)*(n-3)/24);
 	return res;
 }
 
