@@ -26,7 +26,8 @@ public:
 	}
 
 	LL getThatFinalValue() {
-		fprintf(stderr,"Min - %lld Max - %lld\n", tree[0].min, tree[0].max);
+		//fprintf(stderr,"Min - %lld Max - %lld\n", tree[0].min, tree[0].max);
+		propagate(0);
 		return tree[0].max-tree[0].min;
 	}
 
@@ -48,7 +49,6 @@ private:
 				tree[curIndex].min + value; 
 		else if(cl==low && ch==high) {
 			tree[curIndex].update += value;
-			updateMe(curIndex);
 		}
 		else {
 			propagate(curIndex);
@@ -72,18 +72,19 @@ private:
 
 	void propagate(int curIndex) {
 		if(tree[curIndex].update != 0) {
+			updateMe(curIndex);
 			tree[left(curIndex)].update += tree[curIndex].update;
-			updateMe(left(curIndex));
 			tree[right(curIndex)].update += tree[curIndex].update;
-			updateMe(right(curIndex));
 			tree[curIndex].update = 0;
 		}
 	}
 	void update(int curIndex) {
-		tree[curIndex].min = min(tree[left(curIndex)].min, 
-								 tree[right(curIndex)].min);
-		tree[curIndex].max = max(tree[left(curIndex)].max, 
-								 tree[right(curIndex)].max);
+		int l = left(curIndex);
+		int r = right(curIndex);
+		tree[curIndex].min = min(tree[l].min + tree[l].update, 
+								 tree[r].min + tree[r].update);
+		tree[curIndex].max = max(tree[l].max + tree[l].update, 
+								 tree[r].max + tree[r].update);
 	}
 	inline int left(int curIndex) { return 2*(curIndex+1)-1; }
 	inline int right(int curIndex) { return 2*(curIndex+1); }
