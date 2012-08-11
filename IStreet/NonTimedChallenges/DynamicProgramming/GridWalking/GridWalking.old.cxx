@@ -101,6 +101,8 @@
 //
 // Similarly, for every dimension that becomes the edge after 'k' positions, we 
 // should subtract (2N)^(M-k-1) from (2N)^M
+// This doesn't work out that easilyt either. I've thought of a new simpler
+// solution which will be in a new file.
 //
 
 
