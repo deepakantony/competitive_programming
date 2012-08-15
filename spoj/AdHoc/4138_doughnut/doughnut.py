@@ -6,7 +6,7 @@ def isDoughnutHeavy( numOfDoughnuts, bagCapacity, weightOfEachDoughnut ):
     return numOfDoughnuts * weightOfEachDoughnut > bagCapacity
 
 def main():
-    numberOfTests = int(raw_input('Number of Tests: '))
+    numberOfTests = int(raw_input())
     for n in xrange(numberOfTests):
         (n, k, w) = map(int, raw_input().strip().split())
         if isDoughnutHeavy(n, k, w):
