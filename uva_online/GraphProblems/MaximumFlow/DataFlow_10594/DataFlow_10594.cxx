@@ -28,6 +28,8 @@ typedef unsigned long long ULL;
 #define inf 1000000000
 
 LL res[101][101];
+LL cap[101][101];
+LL flow[101][101];
 LL cost[101][101];
 int path[101];
 LL dist[101];
@@ -46,7 +48,9 @@ LL bellmanford(int source, int destination) {
 	REP(i, N-1) FOR(u, 1, G.size()) REP(j, G[u].size()) {
 		int v = G[u][j].first;
 		int w = G[u][j].second;
-		if(res[u][v] > 0 && dist[u]+w < dist[v]) 
+		if(flow[v][u] > 0 && dist[u]-w < dist[v]) 
+			path[v] = u, dist[v] = dist[u]-w;
+		if(flow[u][v] < cap[u][v] && dist[u]+w < dist[v])
 			path[v] = u, dist[v] = dist[u]+w;
 	}
 	//printf("%d\n", dist[destination]);
@@ -78,12 +82,14 @@ LL dijkstras(int source, int destination)
 
 
 // Based on the path array, update the residual graph
-ULL augment(int cur, ULL minflow) {
-	if(path[cur] == -1) return minflow;
+ULL augment(int v, ULL minflow) {
+	int u = path[v];
+	if(u == -1) return minflow;
 	else {
-		minflow = augment(path[cur], min(minflow, (ULL)res[path[cur]][cur]));
-		res[path[cur]][cur] -= minflow;
-		res[cur][path[cur]] += minflow;
+		ULL w = flow[v][u] ? flow[v][u] : cap[u][v] - flow[u][v];
+		minflow = augment(u, min(minflow, w));
+		if(flow[v][u]) flow[v][u] -= minflow;
+		else flow[u][v] += minflow;
 		//G[cur].pb(mp(path[cur], dist[path[cur]] - dist[cur]));
 	}
 	return minflow;
@@ -92,6 +98,7 @@ ULL augment(int cur, ULL minflow) {
 ULL mf() {
 	unsigned long long int mincost = 0;
 	LL curCost = 0;
+	SET(flow, 0);
 	while(D > 0 && (curCost = bellmanford(1, N)) != inf) {
 		ULL minflow = augment(N, D);
 		//fprintf(stderr, "D:%d minflow:%d curcost:%d\n",D, minflow, curCost);
@@ -109,11 +116,11 @@ int main(int argc, char *argv[])
 		int u, v, w;
 		while(M--) scanf("%d%d%d", &u,&v,&w), G[u].pb(mp(v,w)), G[v].pb(mp(u,w));
 
-		scanf("%d %d", &D, &K);
+		scanf("%lld %lld", &D, &K);
 
-		SET(res, 0); SET(cost, 0);
+		SET(cap, 0); SET(cost, 0);
 		FOR(i, 1, G.size()) REP(j, G[i].size())
-			res[i][G[i][j].first] = K, cost[i][G[i][j].first]=G[i][j].second;
+			cap[i][G[i][j].first] = K, cost[i][G[i][j].first]=G[i][j].second;
 
 		ULL mc = mf();
 		if(D) printf("Impossible.\n");
