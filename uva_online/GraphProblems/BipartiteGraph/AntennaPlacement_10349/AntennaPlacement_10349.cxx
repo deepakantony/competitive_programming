@@ -1,9 +1,8 @@
 /*
-  Template CPP main file.
-  Problem:
-  Link:
+  Problem: Antenna Placement
+  Link: http://uva.onlinejudge.org/external/103/10349.html
   Author: deebee
-  Solution: 
+  Solution: bipartite graph
 */
 
 #include <cstdio>
@@ -25,6 +24,18 @@ typedef vector<VL> VVL;
 #define REP(i, n) for(int i = 0; i < (n); ++i)
 #define FOR(i, st, nd) for(int i = (st); i < (nd); ++i)
 #define SET(a, val) memset(a, val, sizeof(a))
+
+void solve_10349() {
+	int T; scanf("%d", &T);
+	char inp[45][15];
+	int h, w;
+	while(T--) {
+		scanf("%d%d", &h, &w);
+		REP(row, h) scanf("%s", inp[row]);
+
+		
+	}
+}
 
 int main(int argc, char *argv[]) {
 #ifndef ONLINE_JUDGE
