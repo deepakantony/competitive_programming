@@ -1,4 +1,13 @@
-2                      
+4
+3 3
+ooo
+*oo
+oo*
+4 3
+***
+*oo
+*oo
+*oo                      
 7 9                    
 ooo**oooo
 **oo*ooo*
