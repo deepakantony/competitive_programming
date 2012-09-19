@@ -1,5 +1,16 @@
 2
 
+A 2
+C 3
+B 5 AC
+D 10 B
+H 13 GF
+E 11 B
+G 12
+F 2 DE
+I 10
+J 20 I
+
 A 5
 B 3 A
 D 2 A
