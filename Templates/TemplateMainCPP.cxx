@@ -1,8 +1,7 @@
 /*
-  Template CPP main file.
-  Problem:
+  Problem: Template CPP main file.
   Link:
-  Author: deebee
+  Author: Deepak Antony - "deebee" "drunkbeast" "dAbeAst"
   Solution: 
 */
 
@@ -12,19 +11,28 @@
 #include <ctime>
 #include <vector>
 #include <algorithm>
+#include <utility>
+#include <limits>
 
 using namespace std;
 
-typedef long long LL;
 typedef unsigned long long UL;
+typedef long long LL;
+typedef pair<int,int> PII;
+
 typedef vector<int> VI;
 typedef vector<VI> VVI;
 typedef vector<LL> VL;
 typedef vector<VL> VVL;
+typedef vector<PII> VPII;
+typedef vector<VPII> VVPII;
 
 #define REP(i, n) for(int i = 0; i < (n); ++i)
 #define FOR(i, st, nd) for(int i = (st); i < (nd); ++i)
 #define SET(a, val) memset(a, val, sizeof(a))
+#define mp make_pair
+
+#define INF numeric_limits<int>::max()
 
 int main(int argc, char *argv[]) {
 #ifndef ONLINE_JUDGE
