@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <utility>
 #include <limits>
+#include <string>
 
 using namespace std;
 
@@ -89,21 +90,21 @@ VVL memo;
 
 // DP for number of possible queen arrangements
 UL numberOfArrangements(int curNode, int numberOfQueensLeft) {
-	if(memo[curNode][numberOfQueensLeft] != -1llu)
-		return memo[curNode][numberOfQueensLeft];
+	UL &res = memo[curNode][numberOfQueensLeft];
+	if(res != -1)
+		return res;
 	if(numberOfQueensLeft == 1)
-		return memo[curNode][numberOfQueensLeft] = 1;
-	UL res = 0;
+		return res = 1;
+	res = 0;
 	REP(i, G[curNode].size()) 
 		res += numberOfArrangements(G[curNode][i], numberOfQueensLeft-1);
-	return memo[curNode][numberOfQueensLeft] = res;
+	return res;
 }
 
 // find the number of arrangements i.e. the final answer required
 UL numberOfArrangements(int boardSize) {
 	UL totalArrangements = 0;
-	memo.assign(G.size(), VL());
-	REP(i, memo.size()) memo[i].assign(boardSize, -1llu);
+	memo.assign(G.size(), VL(boardSize+1, -1));
 	REP(i, G.size()) {
 		totalArrangements += numberOfArrangements(i, boardSize);
 	}
@@ -118,16 +119,43 @@ void solveInjuredQueenProblem() {
 		if(initialArrangementIsPossible(inp, boardSize)) {
 			constructGraph(inp, boardSize);
 			UL res = numberOfArrangements(boardSize);
-			printf("%s boardSize:%d G.size:%d memo.size:%d res: ", 
-				   inp, boardSize, (int)G.size(), (int)memo.size());
-			
 			printf("%llu\n", res);
-			REP(i, G.size()) G[i].clear();
-			REP(i, memo.size()) memo[i].clear();
-			G.clear(), memo.clear();
 		}
 		else printf("0\n");
 	}
+}
+
+void unitTests() {
+	char inp[] = "??????";
+	constructGraph(inp, 6);
+	UL res1 = numberOfArrangements(6);
+	VVI G1(G);
+	VVL memo1(memo);
+	constructGraph(inp, 6);
+	UL res2 = numberOfArrangements(6);
+	VVI G2(G);
+	VVL memo2(memo);
+	assert(G1.size() == G2.size());
+	REP(i, G1.size()) {
+		assert(G1[i].size() == G2[i].size());
+		REP(j, G1[i].size())
+			assert(G[i][j] == G2[i][j]);
+	}
+	assert(memo1.size() == memo2.size());
+	REP(i, memo1.size()) {
+		assert(memo1[i].size() == memo2[i].size());
+		assert(memo1[i].size() == 7);
+		REP(j, memo1[j].size()) {
+			if(memo1[i][j] != memo2[i][j]) {
+				printf("%d %d %llu %llu", i, j, memo1[i][j], memo2[i][j]);
+				exit(-1);
+			}
+			
+		}
+
+	}
+	printf("%llu %llu\n", res1, res2); fflush(stdout);
+	assert(res1 == res2);
 }
 
 int main(int argc, char *argv[]) {
@@ -137,6 +165,7 @@ int main(int argc, char *argv[]) {
 #endif 
 	// solve something here
 	solveInjuredQueenProblem();
+	//unitTests();
 
 #ifndef ONLINE_JUDGE
 	fprintf(stderr, "Time taken : %.5f seconds.\n",
