@@ -34,15 +34,36 @@ typedef vector<VPII> VVPII;
 #define mp make_pair
 
 #define INF numeric_limits<int>::max()
+#define MOD 1000007
 
 VVI G;
 char board[110][110];
 int N;
+VL memo;
 
-void addEdgesToLocation(int row, int col) {
-	if(row > 0) {
-
+LL pathsToTop(int row, int col) {
+	LL &res = memo[row*N+col];
+	if(res == -1) {
+		res = 0;
+		if(row == 0) res = 1;
+		else if(row > 0) {
+			if(col > 0) {
+				if(board[row-1][col-1] == '.') 
+					res = (res+pathsToTop(row-1, col-1))%MOD;
+				else if(board[row-1][col-1] == 'B' && col > 1 && row > 1 &&
+						board[row-2][col-2] == '.')
+					res = (res+pathsToTop(row-2, col-2))%MOD;
+			}
+			if(col < N-1) {
+				if(board[row-1][col+1] == '.')
+					res = (res+pathsToTop(row-1, col+1))%MOD;
+				else if(board[row-1][col+1] == 'B' && col < N-2 && row > 1 &&
+						board[row-2][col+2] == '.')
+					res = (res+pathsToTop(row-2, col+2))%MOD;
+			}
+		}
 	}
+	return res;
 }
 
 void solveCheckers() {
@@ -59,8 +80,11 @@ void solveCheckers() {
 		}
 
 		// construct graph G 
-		G.assign(N, VI());
-		addEdgesToLocation(rowW, colW);
+		//G.assign(N*N, VI());
+		//addEdgesToLocation(rowW, colW);
+
+		memo.assign(N*N, -1);
+		printf("Case %d: %d\n", test+1, pathsToTop(rowW,colW));
 	}
 }
 
