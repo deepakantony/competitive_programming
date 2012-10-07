@@ -6,6 +6,7 @@
 # ******************************************************************************
 
 # Uncomment this line if the judge supports psyco
+# NOTE: psyco is not supported in 2.7 and 3.x+
 # import psyco
 # psyco.full()
 
