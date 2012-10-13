@@ -6,14 +6,15 @@
   6's and 5's, number of 4's and numbers less than 4. 
   Choose the sum that has the least sum of all these numbers.
   The final answer is, 
-        7s = n7s of chosen string + 
-		     (x = min(n7s in the other string, 
-			 n6s+n5s+n4s+n<4s in chosen string))
-		4s = (y = min(n4s in the chosen string, 
-		            n6s+n5s+n4s+n<4s in chosen string - x)) +
-		     min(n4s in the other string, 
-		            n6s+n5s+n4s+n<4s in chosen string - 
-					max(x, n6s+n5s in chosen) - y))
+  7s = n7s of chosen string + 
+           (x = min(n7s in the other string, 
+		   n6s+n5s+n4s+n<4s in chosen string))
+  for 4's swap chosen string if needed based on the newly adjusted values.
+  4s = (y = min(n4s in the chosen string, 
+           n6s+n5s+n4s+n<4s in chosen string - x)) +
+	   min(n4s in the other string, 
+	       n6s+n5s+n4s+n<4s in chosen string - 
+		   max(x, n6s+n5s in chosen) - y))
 */
 
 #include <cstdio>
@@ -65,6 +66,7 @@ void calculateFinalString(const StringProperties &propChosen,
 	int x = min(propOther.n7s, non7sInChosen);
 	int y = min(propChosen.n4s, non7sInChosen-x);
 	int sevens = propChosen.n7s + x;
+	if(
 	int fours = y + min(propOther.n4s, 
 						non7sInChosen - max(x, propChosen.n65s) - y);
 	int curLoc = 0;
@@ -76,7 +78,7 @@ void calculateFinalString(const StringProperties &propChosen,
 
 void solveLittleElephantAndOrder() {
 	int T; scanf("%d", &T);
-	char A[20001], B[20001], res[20001];
+	char A[20010], B[20010], res[20010];
 
 	int lenA, lenB, sumA, sumB;
 
