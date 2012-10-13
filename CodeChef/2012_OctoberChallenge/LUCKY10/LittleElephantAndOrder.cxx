@@ -66,7 +66,7 @@ void calculateFinalString(const StringProperties &propChosen,
 	int x = min(propOther.n7s, non7sInChosen);
 	int y = min(propChosen.n4s, non7sInChosen-x);
 	int sevens = propChosen.n7s + x;
-	if(
+	
 	int fours = y + min(propOther.n4s, 
 						non7sInChosen - max(x, propChosen.n65s) - y);
 	int curLoc = 0;
