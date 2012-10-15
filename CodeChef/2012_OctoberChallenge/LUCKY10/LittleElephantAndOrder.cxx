@@ -7,14 +7,12 @@
   Choose the sum that has the least sum of all these numbers.
   The final answer is, 
   7s = n7s of chosen string + 
-           (x = min(n7s in the other string, 
+           (addtional7s = min(n7s in the other string, 
 		   n6s+n5s+n4s+n<4s in chosen string))
-  for 4's swap chosen string if needed based on the newly adjusted values.
-  4s = (y = min(n4s in the chosen string, 
-           n6s+n5s+n4s+n<4s in chosen string - x)) +
-	   min(n4s in the other string, 
-	       n6s+n5s+n4s+n<4s in chosen string - 
-		   max(x, n6s+n5s in chosen) - y))
+  4s = min(n4s of chosen string + n4s of the other string, 
+           min(n4s+n<4s in the other string,
+		       min(n4s+n<4s of chosen string, 
+			       n6s+n5s+n4s+n<4s in chosen string - additional 7s)))
 */
 
 #include <cstdio>
@@ -63,12 +61,15 @@ void calculateFinalString(const StringProperties &propChosen,
 						  const StringProperties &propOther, 
 						  char *res) {
 	int non7sInChosen = propChosen.n65s + propChosen.n4s + propChosen.n3210s;
-	int x = min(propOther.n7s, non7sInChosen);
-	int y = min(propChosen.n4s, non7sInChosen-x);
-	int sevens = propChosen.n7s + x;
+	int additional7s = min(propOther.n7s, non7sInChosen);
+	//int y = min(propChosen.n4s, non7sInChosen-x);
+	int sevens = propChosen.n7s + additional7s;
 	
-	int fours = y + min(propOther.n4s, 
-						non7sInChosen - max(x, propChosen.n65s) - y);
+	int fours = min(propChosen.n4s + propOther.n4s, 
+					min(propOther.n4s + propOther.n3210s,
+						min(propChosen.n4s + propChosen.n3210s,
+							non7sInChosen - additional7s)));
+
 	int curLoc = 0;
 	//fprintf(stderr, "--%d %d %d %d %d\n", non7sInChosen, x, y, sevens, fours);
 	REP(i, sevens) res[curLoc++] = '7';
