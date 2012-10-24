@@ -2,7 +2,9 @@
   Problem: Gathering Food
   Link: http://uva.onlinejudge.org/external/114/11487.html
   Author: Deepak Antony - "deebee" "drunkbeast" "dAbeAst"
-  Solution: DP/DAG problem. TODO: more description
+  Solution: DP/DAG problem. Search DAG using bfs from A to B and then find total 
+  number of paths to B. Similarly continue till the end. If you reach the end
+  multiply the number of paths and display output.
 */
 
 #include <cstdio>
