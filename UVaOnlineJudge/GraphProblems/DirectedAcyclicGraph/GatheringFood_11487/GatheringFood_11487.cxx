@@ -16,6 +16,7 @@
 #include <utility>
 #include <limits>
 #include <queue>
+#include <cctype>
 
 using namespace std;
 
