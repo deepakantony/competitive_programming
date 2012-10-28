@@ -109,7 +109,8 @@ int middleVertex(const VI &connected) {
 	return middle;
 }
 
-void solve() {
+// THIS IS WRONG; see the method solve() 
+void solve1() {
 	apsp();
 	if(maxflights == 3)
 		cancelled_u = parent[max_u][max_v], cancelled_v = max_v;
@@ -139,7 +140,92 @@ void solve() {
 	apsp();
 }
 
-// remove the center edge and join the centers of the two components.
+int eccentricity(int root, const VVI &G, VI &parent, int &max_dist) {
+	int ecc = root;
+	max_dist = 0;
+	VI dist(parent.size(), -1);
+	queue<int> Q; Q.push(root);
+	dist[root] = 0;
+	while(!Q.empty()) {
+		int cur_vert = Q.front(); Q.pop();
+		REP(i, G[cur_vert].size()) {
+			int next_vert = G[cur_vert][i];;
+			if(dist[next_vert] == -1) {
+				Q.push(next_vert);
+				parent[next_vert] = cur_vert;
+				dist[next_vert] = dist[cur_vert]+1;
+				if(max_dist <= dist[next_vert])
+					max_dist = dist[next_vert], ecc = next_vert;
+			}
+		}
+	}
+	return ecc;
+}
+
+int find_mid(const VI &parent, int root, int path_length) {
+	int mid = root;
+	REP(i, path_length/2) mid = parent[mid];
+	return mid;
+}
+
+void solve() {
+	// find the diameter
+	VI parent_ecc(G.size(), -1);
+	int length, best_length;
+	int best_c_u, best_c_v, best_n_u, best_n_v;
+	int ecc_u = eccentricity(0, G, parent_ecc, length);
+	parent_ecc.assign(G.size(), -1);
+	int ecc_v = eccentricity(ecc_u, G, parent_ecc, best_length);
+	// now the path ecc_u to ecc_v is the longest path.
+
+
+	VI main_parent(parent_ecc.begin(), parent_ecc.end());
+	int cancelled_u = ecc_v;
+	while(main_parent[cancelled_u] != -1) {
+		
+		cancelled_v = main_parent[cancelled_u];
+		removeEdge(cancelled_u, cancelled_v);
+
+		// find center of the two components
+		parent_ecc.assign(G.size(), -1);
+		ecc_u = eccentricity(cancelled_u, G, parent_ecc, length);
+		parent_ecc.assign(G.size(), -1);
+		ecc_v = eccentricity(ecc_u, G, parent_ecc, length);
+		new_u = find_mid(parent_ecc, ecc_v, length);
+	
+		parent_ecc.assign(G.size(), -1);
+		ecc_u = eccentricity(cancelled_v, G, parent_ecc, length);
+		parent_ecc.assign(G.size(), -1);
+		ecc_v = eccentricity(ecc_u, G, parent_ecc, length);
+		new_v = find_mid(parent_ecc, ecc_v, length);
+
+		addNewEdge(new_u, new_v);
+
+		parent_ecc.assign(G.size(), -1);
+		ecc_u = eccentricity(0, G, parent_ecc, length);
+		parent_ecc.assign(G.size(), -1);
+		ecc_v = eccentricity(ecc_u, G, parent_ecc, length);
+		maxflights = length;
+
+		if(maxflights < best_length) {
+			best_c_u = cancelled_u, best_c_v = cancelled_v;
+			best_n_u = new_u, best_n_v = new_v;
+			best_length = maxflights;
+		}
+
+		removeEdge(new_u, new_v);
+		addNewEdge(cancelled_u, cancelled_v);
+		cancelled_u = cancelled_v;
+	}
+	
+	printf("%d\n", best_length);
+	printf("%d %d\n", best_c_u+1, best_c_v+1);
+	printf("%d %d\n", best_n_u+1, best_n_v+1);
+
+}
+
+// along the diameter remove the worst edge  and join the centers of the two 
+// components.
 int main(int argc, char *argv[]) {
 	int T; scanf("%d", &T);
 	int N, u, v;
@@ -149,9 +235,6 @@ int main(int argc, char *argv[]) {
 		REP(i, N-1) scanf("%d%d", &u, &v), G[u-1].pb(v-1), G[v-1].pb(u-1);
 
 		solve();
-		printf("%d\n", maxflights);
-		printf("%d %d\n", cancelled_u+1, cancelled_v+1);
-		printf("%d %d\n", new_u+1, new_v+1);
 	}
 	return 0;
 }
