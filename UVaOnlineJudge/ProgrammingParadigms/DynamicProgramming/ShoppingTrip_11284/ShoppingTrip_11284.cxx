@@ -91,12 +91,12 @@ int TSP(int curpos, int bitmask) {
 		if(bitmask == 0) 
 			memo[curpos][bitmask] = -finalCost[curpos][0];
 		else {
-			REP(pos, 1, nDVD+1) {
-				if(isBitOn(bitmask, pos)) {
-					int res = costSaving[pos] - finalCost[curpos][pos] +
-						TSP(pos, unsetBit(bitmask, pos));
-					res = max(res, TSP(curpos, unsetBit(bitmask, pos)));
-					memo[curpos][bitmask] = res;
+			REP(dvd, 1, nDVD+1) {
+				if(isBitOn(bitmask, dvd)) {
+					int res = costSaving[dvd] - finalCost[curpos][dvd] +
+						TSP(dvd, unsetBit(bitmask, dvd));
+					res = max(res, TSP(curpos, unsetBit(bitmask, dvd)));
+					memo[curpos][bitmask] = max(memo[curpos][bitmask], res);
 				}
 			}
 		}
@@ -105,28 +105,36 @@ int TSP(int curpos, int bitmask) {
 }
 
 int TSP() {
-	return TSP(0, unsetBit((1<<(nDVD+1))-1, 0));
+	return TSP(0, (1<<(nDVD+1))-2);//unsetBit((1<<(nDVD+1))-1, 0));
 }
 
 int main(int argc, char *argv[])
 {
 	int nTests; scanf("%d", &nTests);
+	int cost1, cost2;
+	int N, M;
+	int v1,v2, w1,w2;
 	while(nTests--) {
-		int N, M; scanf(" %d %d", &N, &M);
+		scanf(" %d %d", &N, &M);
 		Graph G(N+1);
 		while(M--) {
-			int v1,v2, w1,w2;
-			scanf(" %d %d %d.%d", &v1, &v2, &w1, &w2);
-			G.addEdge(v1,v2,w1*100+w2);
+			
+			//float weight;
+			scanf("%d%d%d.%d", &v1, &v2, &w1, &w2);
+			//G.addEdge(v1,v2,int(weight*100 + 10E-9)); 
+			G.addEdge(v1, v2, w1*100+w2);
 		}
 		int sum = 0;
 		scanf(" %d", &nDVD);
 		stores[0] = 0;
 		costSaving[0] = 0;
+		//float doubleCost;
 		REP(i, 1, nDVD+1) {
-			int cost1, cost2;
+
 			scanf(" %d %d.%d", &stores[i], &cost1, &cost2);
+			//scanf("%d%f", &stores[i], &doubleCost);
 			costSaving[i] = cost1*100 + cost2;
+			//(int)(doubleCost*100+10E-9);
 		}
 		updateDistForTSP(G);
 		REP(i, 0, nDVD+1) REP(j, 0, 1<<(nDVD+1)) memo[i][j] = -INF;
