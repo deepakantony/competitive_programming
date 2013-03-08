@@ -19,6 +19,8 @@ using namespace std;
 typedef unsigned long long UL;
 typedef long long LL;
 typedef pair<int,int> PII;
+typedef pair<int, LL> PIL;
+typedef pair<int, UL> PIU;
 
 typedef vector<int> VI;
 typedef vector<VI> VVI;
@@ -34,13 +36,13 @@ typedef vector<VPII> VVPII;
 
 #define INF numeric_limits<int>::max()
 
-#define MODULO_NUM 1000000007
+#define MODULO_NUM 1000000007llu
 
-int number_of_nodes_in_component(
+UL number_of_nodes_in_component(
 	VVI &graph, VI &node_label_array, int cur_node_index
 	)
 {
-	int n_nodes_in_cur_component = 1;
+	UL n_nodes_in_cur_component = 1;
 	int node_index;
 
 	node_label_array[cur_node_index] = 1;
@@ -59,12 +61,12 @@ int number_of_nodes_in_component(
 	return n_nodes_in_cur_component;
 }
 
-PII number_of_connected_components(VVI &graph)
+PIU number_of_connected_components(VVI &graph)
 {
 	int n_connected_components = 0;
-	LL n_node_combinations = 1;
-	int n_final_result_node_combinations;
-	int n_nodes_in_component;
+	UL n_node_combinations = 1;
+	//int n_final_result_node_combinations;
+	UL n_nodes_in_component;
 	int node_index;
 	VI node_label_array(graph.size(), 0);
 
@@ -83,9 +85,9 @@ PII number_of_connected_components(VVI &graph)
 		}
 	}
 
-	n_final_result_node_combinations = (int)n_node_combinations;
+	//n_final_result_node_combinations = (int)n_node_combinations;
 
-	return mp(n_connected_components, n_final_result_node_combinations);
+	return mp(n_connected_components, n_node_combinations);
 }
 
 void solve_fire_escape_routes()
@@ -111,8 +113,8 @@ void solve_fire_escape_routes()
 			graph[node_1].push_back(node_2);
 		}
 
-		PII component_combination_pair = number_of_connected_components(graph);
-		printf("%d %d\n", 
+		PIU component_combination_pair = number_of_connected_components(graph);
+		printf("%d %llu\n", 
 			   component_combination_pair.first,
 			   component_combination_pair.second);
 	}
