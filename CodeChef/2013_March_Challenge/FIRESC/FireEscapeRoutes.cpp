@@ -112,6 +112,7 @@ void solve_fire_escape_routes()
 			--node_2;
 
 			graph[node_1].push_back(node_2);
+			graph[node_2].push_back(node_1);
 		}
 
 		PIU component_combination_pair = number_of_connected_components(graph);
