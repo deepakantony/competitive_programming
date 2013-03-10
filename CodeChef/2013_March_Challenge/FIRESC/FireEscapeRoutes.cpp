@@ -36,7 +36,7 @@ typedef vector<VPII> VVPII;
 
 #define INF numeric_limits<int>::max()
 
-#define MODULO_NUM 1000000007llu
+#define MODULO_NUM 1000000007
 
 UL number_of_nodes_in_component(
 	VVI &graph, VI &node_label_array, int cur_node_index
@@ -51,10 +51,11 @@ UL number_of_nodes_in_component(
 	{
 		if(node_label_array[graph[cur_node_index][node_index]] == 0)
 		{
-			n_nodes_in_cur_component += 
+			n_nodes_in_cur_component =
+				(n_nodes_in_cur_component +
 				number_of_nodes_in_component(
 					graph, node_label_array, graph[cur_node_index][node_index]
-					);
+					)) % MODULO_NUM;
 		}
 	}
 
