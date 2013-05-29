@@ -3,14 +3,14 @@
 #define PI 3.14159265359
 #define EPSILON 1E-9
 #define ANGLE_TO_RADIANS_MULTIPLIER 0.01745329251994 // PI / 180.0;
-#define FLOAT_EQUALS( num1, num2 ) ( fabs( num1 - num2 ) < EPSILON )
+#define FLOAT_EQUALS( num1, num2 ) ( fabs( ( num1 ) - ( num2 ) ) < EPSILON )
 
 //
 // absolute value
 template<typename number_type>
 number_type absolute_value( const number_type &number )
 {
-	if( number < (number_type)0 )
+	if( number < (number_type)(0) )
 		return -number;
 	else 
 		return number;
