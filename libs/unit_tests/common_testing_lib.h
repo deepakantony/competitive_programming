@@ -5,7 +5,7 @@
 #define common_testing_lib_def_green_printf "\x1B[32m"
 
 #define TEST_ASSERT( condition, test_description )		\
-	printf("%s: ", test_description);					\
+	printf("%s - %s: ", test_description, #condition);	\
 	if ( (condition) )									\
 	{													\
 		printf("%sPASS%s\n",							\
