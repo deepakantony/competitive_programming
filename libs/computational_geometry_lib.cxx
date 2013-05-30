@@ -3,7 +3,7 @@
 template<typename length_type, typename return_type>
 return_type hypotenuse(const length_type side_a, const length_type side_b)
 {
-	return sqrt( side_a * side_a + side_b * side_b );
+	return return_type( sqrt( side_a * side_a + side_b * side_b ) );
 }
 
 //
@@ -17,7 +17,7 @@ public:
 
 	template<typename distance_type>
 	distance_type distance(const point_t &other_point) const {
-		return hypotenuse<distance_type>( 
+		return hypotenuse<coordinate_type, distance_type>( 
 			absolute_value( other_point.x_ - x_ ),
 			absolute_value( other_point.y_ - y_ ) );
 	}
