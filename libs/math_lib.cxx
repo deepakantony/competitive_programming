@@ -1,7 +1,7 @@
 //
 // common defines & constants
 #define PI 3.14159265359
-#define EPSILON 1E-9
+#define EPSILON 1E-6
 #define ANGLE_TO_RADIANS_MULTIPLIER 0.01745329251994 // PI / 180.0;
 #define FLOAT_EQUALS( num1, num2 ) ( fabs( ( num1 ) - ( num2 ) ) < EPSILON )
 
