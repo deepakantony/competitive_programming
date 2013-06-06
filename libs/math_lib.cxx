@@ -6,6 +6,25 @@
 #define FLOAT_EQUALS( num1, num2 ) ( fabs( ( num1 ) - ( num2 ) ) < EPSILON )
 
 //
+// Operator equals
+template<typename number_type>
+bool equals( const number_type &number_1, const number_type &number_2 )
+{ 
+	return number_1 == number_2;
+}
+template<> 
+bool equals<double>( const double &number_1, const double &number_2 )
+{
+	return FLOAT_EQUALS( number_1, number_2 );
+}
+template<> 
+bool equals<float>( const float &number_1, const float &number_2 )
+{
+	return FLOAT_EQUALS( number_1, number_2 );
+}
+
+
+//
 // absolute value
 template<typename number_type>
 number_type absolute_value( const number_type &number )
