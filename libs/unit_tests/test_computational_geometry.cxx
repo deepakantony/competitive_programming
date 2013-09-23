@@ -77,10 +77,41 @@ void test_class_point_t()
 	TEST_ASSERT( test_double_point_1 < test_double_point_2, "Less than for double" );
 }
 
+void test_class_line_t()
+{
+	line_t test_line_1( point_t<int>(2,2), point_t<int>(4,2) );
+	line_t test_line_2( point_t<int>(4,0), point_t<int>(2,0) );
+	line_t test_line_3( point_t<int>(0,2), point_t<int>(0,4) );
+	line_t same_line_as_1( point_t<int>(2,2), point_t<int>(4,2) );
+	line_t x_axis( 0.0, 0.0 );
+	line_t y_axis( point_t<int>(0, 0), point_t<int>(0, 1) );
+
+	// Test parallel lines
+	TEST_ASSERT( test_line_1.is_parallel( x_axis ), "Parallel with xaxis" );
+	TEST_ASSERT( test_line_3.is_parallel( y_axis ), "Parallel with yaxis" );
+	TEST_ASSERT( test_line_1.is_parallel( test_line_2 ), "Parallel with another line" );
+	TEST_ASSERT( !test_line_1.is_parallel( y_axis ), "NOT parallel with yaxis" );
+
+	// Test same lines
+	TEST_ASSERT( test_line_1.is_same( same_line_as_1 ), "Test with same line" );
+	TEST_ASSERT( !test_line_1.is_same( x_axis ), "Test with not same line" );
+
+	// Test intersection of lines
+	point_t<double> intersection_pt;
+	TEST_ASSERT( test_line_1.get_intersection_point( y_axis, intersection_pt ), 
+				 "Test intersection point true return result" );
+	TEST_ASSERT( intersection_pt == point_t<double>( 0.0, 2.0 ), 
+				 "Test intersection point" );
+	TEST_ASSERT( !test_line_1.get_intersection_point( x_axis, intersection_pt ), 
+				 "Test intersection point false return result" );
+
+}
+
 void test_computation_geometry_lib()
 {
 	test_general_functions();
 	test_class_point_t();
+	test_class_line_t();
 }
 
 int main(int argc, char *argv[])
