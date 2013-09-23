@@ -70,12 +70,16 @@ public:
 	line_t( point_t<coordinate_type> point_1,
 			point_t<coordinate_type> point_2 
 		) {
-		a_ = (double)( point_2.y() - point_1.y() );
-		c_ = (double)( point_2.x() * point_1.y() - point_1.x() * point_2.y() );
 		if( equals( point_1.x(), point_2.x() ) ) 
+		{
+			a_ = 1.0;
 			b_ = 0.0;
+			c_ = -point_1.x();
+		}
 		else
 		{
+			a_ = (double)( point_2.y() - point_1.y() );
+			c_ = (double)( point_2.x() * point_1.y() - point_1.x() * point_2.y() );
 			a_ = -a_ / (double)( point_2.x() - point_2.y() );
 			b_ = 1.0;
 			c_ = -c_ / (double)( point_2.x() - point_2.y() );
@@ -83,11 +87,35 @@ public:
 	}
 
 	// slope intercept formula
+	// - will not work for vertical lines; what is m?
 	line_t( double m, double c ) : a_(-m), b_(1.0), c_(-c) {}
 
 	// is parallel with another line
-	bool is_parallel( const line_t &other ) {
+	bool is_parallel( const line_t &other ) const {
 		return ( equals( a_, other.a_ ) && equals( b_, other.b_ ) );
+	}
+
+	// is same as another line
+	bool is_same( const line_t &other ) const {
+		return ( this->is_parallel( other ) && equals( c_, other.c_ ) );
+	}
+	bool operator==( const line_t &other ) const { return is_same(other); }
+
+	// where does it intersect
+	template<typename coordinate_type>
+	bool get_intersection_point( const line_t &other, point_t<coordinate_type> &intersection_pt ) const {
+		if( this->is_parallel( other ) ) return false;
+
+		coordinate_type x = ( coordinate_type )
+			( other.b_ * c_ - b_ * other.c_ ) / ( other.a_ * b_ - a_ * other.b_ );
+		coordinate_type y;
+
+		// vertical line
+		if( !equals( b_, 0.0 ) ) y = (coordinate_type)(-( a_ * x + c_ ));
+		else y = (coordinate_type)(-( other.a_ * x + other.c_ ));
+
+		intersection_pt = point_t<coordinate_type>(x,y);
+		return true;
 	}
 
 private:
