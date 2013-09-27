@@ -22,37 +22,37 @@ class point_t
 {
 public:
 	point_t() {}
-	point_t(const coordinate_type &x, const coordinate_type &y) : x_(x), y_(y) {}
+	point_t(const coordinate_type &x, const coordinate_type &y) { x_[0] = x, x_[1] = y; }
 
 	template<typename distance_type>
 	distance_type distance(const point_t &other_point) const {
 		return hypotenuse<coordinate_type, distance_type>( 
-			absolute_value( other_point.x_ - x_ ),
-			absolute_value( other_point.y_ - y_ ) );
+			absolute_value( other_point.x_[0] - x_[0] ),
+			absolute_value( other_point.x_[1] - x_[1] ) );
 	}
 
 	point_t<coordinate_type> rotate_by_angle_in_degrees( double angle_in_degrees ) {
 		double angle_in_radians = angle_in_degrees * ANGLE_TO_RADIANS_MULTIPLIER;
 		return point_t( 
-			x_ * cos( angle_in_radians ) - y_ * sin( angle_in_radians ),
-			x_ * sin( angle_in_radians ) + y_ * cos( angle_in_radians )
+			x_[0] * cos( angle_in_radians ) - x_[1] * sin( angle_in_radians ),
+			x_[0] * sin( angle_in_radians ) + x_[1] * cos( angle_in_radians )
 			);
 	}
 
 	bool operator< (const point_t<coordinate_type> &other_point) const {
-		if( equals( x_, other_point.x_ ) ) return y_ < other_point.y_;
-		else return x_ < other_point.x_;
+		if( equals( x_[0], other_point.x_[0] ) ) return x_[1] < other_point.x_[1];
+		else return x_[0] < other_point.x_[0];
 	}
 
 	bool operator== (const point_t<coordinate_type> &other_point) const {
-		return ( equals( x_, other_point.x_ ) ) && ( equals(y_, other_point.y_ ) );
+		return ( equals( x_[0], other_point.x_[0] ) ) && ( equals(x_[1], other_point.x_[1] ) );
 	}
 
-	coordinate_type x() { return x_; }
-	coordinate_type y() { return y_; }
+	coordinate_type x() { return x_[0]; }
+	coordinate_type y() { return x_[1]; }
 
 private:
-	coordinate_type x_, y_;
+	coordinate_type x_[2]; // TODO: Update this to a template param
 };
 
 //
@@ -122,3 +122,31 @@ private:
 	double a_, b_, c_;
 };
 
+class vector_t
+{
+public:
+	vector_t( double x1, double x2 ) { x_[0] = x1, x_[1] = x2; }
+	template<typename coordinate_type>
+	vector_t( const point_t<coordinate_type> &p1, const point_t<coordinate_type> &p2 ) {
+		x_[0] = (double) ( p2.x() - p1.x() );
+		x_[1] = (double) ( p2.y() - p2.y() );
+	}
+
+	void normalize() { double norm = get_norm(); x_[0] /= norm; x_[1] /= norm; }
+
+	double get_norm_square() const { return (x_[0] * x_[0] + x_[1] * x_[1]); } 
+
+	double get_norm() const { return sqrt(get_norm_square()); }
+
+	template<typename coordinate_type>
+	point_t<coordinate_type> translate_point( point_t<coordinate_type> pt ) const { 
+		return point_t<coordinate_type>( (coordinate_type)( x_[0] + pt.x() ), coordinate_type( x_[1] + pt.y() ) );
+	}
+
+	void scale( double scale_factor ) { x_[0] *= scale_factor; x_[1] *= scale_factor; }
+
+	double dot_product( const vector_t &other ) const { return x_[0] * other.x_[0] + x_[1] * other.x_[1]; }
+
+private:
+	double x_[2];
+};
