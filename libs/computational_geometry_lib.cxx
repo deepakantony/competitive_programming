@@ -117,7 +117,6 @@ public:
 		intersection_pt = point_t<coordinate_type>(x,y);
 		return true;
 	}
-
 private:
 	double a_, b_, c_;
 };
@@ -150,3 +149,22 @@ public:
 private:
 	double x_[2];
 };
+
+// distance from a point
+template<typename coordinate_type>
+double get_distance_from_a_point( 
+	const point_t<coordinate_type> &line_pt1, const point_t<coordinate_type> &line_pt2,
+	const point_t<coordinate_type> &pt, point_t<coordinate_type> *p_nearest_pt = NULL ) 
+{
+	double dist = 0.0;
+	vector_t A( line_pt1, line_pt2 ), B( line_pt1, pt );
+	double AdotB = A.dot_product( B );
+	double distanceToNearestPt = AdotB/B.get_norm();
+	vector_t C( B ); C.scale(distanceToNearestPt);
+	point_t<coordinate_type> nearest_pt = C.translate_point( line_pt1 );
+	dist = nearest_pt.distance( pt );
+
+	if( p_nearest_pt != NULL ) { *p_nearest_pt = nearest_pt; }
+	return dist;
+}
+
