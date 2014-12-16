@@ -1,8 +1,8 @@
 # ***************************************************************************
-# Problem: Template Python file.
-# Link:
+# Problem: multiples of 3 and 5
+# Link: https://www.hackerrank.com/contests/projecteuler/challenges/euler001
 # Author: Deepak Antony - "deebee" "drunkbeast" "dAbeAst"
-# Solution: 
+# Solution: derive the formula to find sum of N multiples of a number
 # ***************************************************************************
 
 import time
@@ -17,11 +17,22 @@ def timeElapsed(fn):
         return res
     return wrapper
 
+def sum_of_n_integers(n):
+    return n*(n+1)//2
+
 @timeElapsed
 def main():
     """ Main controller """
     # solve a problem here
-    pass
+    T = int(input().strip())
+    for test in range(T):
+        N = int(input().strip())
+        N = N-1
+        sum = 0
+        sum += 3*sum_of_n_integers(N//3)
+        sum += 5*sum_of_n_integers(N//5)
+        sum -= 15*sum_of_n_integers(N//15)
+        print (sum)
 
 if __name__ == "__main__":
     main()
