@@ -12,15 +12,12 @@ def golf1(n):
  for v in p:
   if v>n:return v
 
-# 2nd solution less optimized for speed and more for golf
+# 2nd solution less optimized for speed and more for golf and needs python2
 r=range
-m=98690
-def p(n):
- for x in r(2,n/2):
-  if n%x==0: return False
- return True
-def golf(n):
- for x in r(n+1,m):
-  if p(x) and int(str(x)[::-1])==x:return x
-        
-    
+def golf2(n):
+ for x in r(n+1,9**7):
+  if all(x%y for y in r(2,x))&(`x`[::-1]==`x`):return x
+
+# 3rd solution using lambda
+r=range
+golf=lambda n:next(x for x in r(n+1,9**7)if`x`[::-1]==`x`*all(x%y for y in r(2,x)))
