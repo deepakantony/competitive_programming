@@ -20,4 +20,13 @@ def golf2(n):
 
 # 3rd solution using lambda
 r=range
-golf=lambda n:next(x for x in r(n+1,9**7)if`x`[::-1]==`x`*all(x%y for y in r(2,x)))
+golf1=lambda n:next(x for x in r(n+1,9**7)if`x`[::-1]==`x`*all(x%y for y in r(2,x)))
+
+# 4th trying while
+def golf(n):
+ n+=1
+ while`n`!=`n`[::-1]*all(n%y for y in range(2,n)):n+=1
+ return n
+
+# using wilsons algo for testing prime num
+
