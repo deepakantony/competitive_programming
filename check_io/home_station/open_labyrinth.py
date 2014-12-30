@@ -1,112 +1,26 @@
 #Your code here
 #You can import some modules or create additional functions
 
+from collections import deque
 
-def checkio(maze_map):
-    #replace this for solution
-    #This is just example for first maze
-    return "SSSSSEENNNEEEEEEESSWWWWSSSEEEESS"
+def construct_path(path_map, start_pos, end_pos):
+    MOVE = { (1,0): 'S', (-1,0): 'N', (0,1): 'E',(0,-1): 'W' }
+    pit_pos = (-1, -1)
+    if path_map[end_pos[0]][end_pos[1]] == pit_pos: 
+        return ""
 
-
-if __name__ == '__main__':
-    #This code using only for self-checking and not necessary for auto-testing
-    def check_route(func, labyrinth):
-        MOVE = {"S": (1, 0), "N": (-1, 0), "W": (0, -1), "E": (0, 1)}
-        #copy maze
-        route = func([row[:] for row in labyrinth])
-        pos = (1, 1)
-        goal = (10, 10)
-        for i, d in enumerate(route):
-            move = MOVE.get(d, None)
-            if not move:
-                print("Wrong symbol in route")
-                return False
-            pos = pos[0] + move[0], pos[1] + move[1]
-            if pos == goal:
-                return True
-            if labyrinth[pos[0]][pos[1]] == 1:
-                print("Player in the pit")
-                return False
-        print("Player did not reach exit")
-        return False
-
-    # These assert are using only for self-testing as examples.
-    assert check_route(checkio, [
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
-        [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
-        [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1],
-        [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1],
-        [1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1],
-        [1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1],
-        [1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]), "First maze"
-    assert check_route(checkio, [
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]), "Empty maze"
-    assert check_route(checkio, [
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-        [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1],
-        [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1],
-        [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1],
-        [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1],
-        [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1],
-        [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1],
-        [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1],
-        [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]), "Up and down maze"
-    assert check_route(checkio, [
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
-        [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
-        [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
-        [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
-        [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
-        [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]), "Dotted maze"
-    assert check_route(checkio, [
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-        [1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1],
-        [1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1],
-        [1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1],
-        [1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-        [1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]), "Need left maze"
-    assert check_route(checkio, [
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1],
-        [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1],
-        [1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
-        [1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]), "The big dead end."
-    print("The local tests are done.")
+    path = ""
+    cur_pos = end_pos
+    while cur_pos != start_pos:
+        if cur_pos == pit_pos: return "" # invalid move
+        path_prev = path_map[cur_pos[0]][cur_pos[1]]
+        if cur_pos == path_prev: return "" # incorrect path map; should only terminate at start pos
+        if cur_pos[0] != path_prev[0] and cur_pos[1] != path_prev[1]: return "" # invalid move
+        diff_prev_to_cur = cur_pos[0] - path_prev[0], cur_pos[1] - path_prev[1]
+        move = MOVE.get(diff_prev_to_cur)
+        if not move: return ""
+        path += move 
+        #if path_prev[0] == (cur_pos[0] - 1): # moving south
+        #path += 'S'
+        #elif path_prev[0] == (cur_pos[0] + 1): # moving north
+        #    path += 'N'
