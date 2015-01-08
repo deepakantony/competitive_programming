@@ -5,53 +5,33 @@
 def checkio(previous):
     if len(previous) == 0: return (0,0)
 
-    d = 9
+    clamp = lambda k: max(0,min(k,9))
+    
+    d = r0 = previous[0][2]
+    d = clamp(d)
     if len(previous) == 1: return (d,0)
 
-    r0,r1 = previous[0][2], previous[1][2]
+    r1 = previous[1][2]
 
     x_real_1 = (r0**2 - r1**2 + d**2) / (2 * d)
     y_real_1 = (r0**2 - x_real_1**2) ** 0.5
 
-    print(x_real_1, y_real_1, y_real_2)
-
-    i,j = round(x_real_1), round(y_real_1)
-    i = 0 if i < 0 else 9 if i > 9 else i
-    j = 0 if j < 0 else 9 if j > 9 else j
+    i,j = clamp(round(x_real_1)), clamp(round(y_real_1))
     if len(previous) == 2: return (i,j)
     
     r2 = previous[2][2]
-    
-    if i != 0 and j != 0
-        
 
-
-    y1_real = ((r0**2 - r2**2 + i*i + j*j)/(2*j)) - (i*x_real_2/j)
-
-    y1 = round(y1_real)
-    x1 = round(x1_real)
-
-
-    return (x,y)
-    
-    # calculate again
     neighbors = {(-1,-1), (0,-1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)}
     for n in neighbors:
-        row,col = x+n[0],y+n[1]
+        row,col = i+n[0],j+n[1]
         if 0 <= row <= 9 and 0 <= col <= 9:
-            # solve and check for both the previous equations
-            if r0**2 == (row**2 + col**2) and r1**2 == ((row-d)**2 + col**2):
+            if r0 == round((row**2 + col**2)**0.5) and \
+               r1 == round(((row-d)**2 + col**2)**0.5) and \
+               r2 == round(((row-i)**2 + (col-j)**2)**0.5):
                 return (row,col)
-
-    for n in neighbors:
-        row,col = x+n[0],y+n[1]
-        if 0 <= row <= 9 and 0 <= col <= 9:
-            # solve for only one of them
-            if r0**2 == (row**2 + col**2) or r1**2 == ((row-d)**2 + col**2):
-                return (row,col)
-
+    
     # i've got nothing I'm just returning previous
-    return (x,y)
+    return (i,j)
 
 if __name__ == '__main__':
     #This part is using only for self-testing.
@@ -59,7 +39,7 @@ if __name__ == '__main__':
         recent_data = []
         for step in range(4):
             row, col = func([d[:] for d in recent_data])  # copy the list
-            print(row,col, ore)
+            #print(row,col, ore)
             if row < 0 or row > 9 or col < 0 or col > 9:
                 print("Where is our probe?")
                 return False
@@ -71,7 +51,7 @@ if __name__ == '__main__':
         return False
 
     for x in range(10):
-        for y in range(10): check_solution(checkio, (x,y)) 
+        for y in range(10): assert check_solution(checkio, (x,y)), str((row,col))
 
 
     assert check_solution(checkio, (1, 1)), "Example"
