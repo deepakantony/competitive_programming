@@ -26,15 +26,23 @@ class disjoint_set:
 
         px,py = self.find(x), self.find(y)
         if px != py:
-            if self.rank[x] > self.rank[y]:
-                self.parent[y] = x
+            if self.rank[px] > self.rank[py]:
+                self.parent[py] = px
                 self.length[px] += self.length[py]
                 self.length.pop(py)
+                self.count -= 1
             else:
-                self.parent[x] = y
-                if self.rank[x] == self.rank[y]: self.rank[y] += 1
+                self.parent[px] = py
+                if self.rank[px] == self.rank[py]: self.rank[py] += 1
                 self.length[py] += self.length[px]
                 self.length.pop(px)
+                self.count -= 1
+
+    def __str__( self ):
+        return "Parent: " + str(self.parent) + "\n" + \
+            "Rank: " + str(self.rank) + "\n" + \
+            "Num of sets: " + str(self.count) + "\n" + \
+            "Size of each set: " + str(self.length) + "\n"
     
 
 def checkio(land_map):
@@ -70,3 +78,9 @@ if __name__ == '__main__':
                     [0, 0, 0, 0, 0, 0],
                     [0, 1, 1, 1, 1, 0],
                     [0, 0, 0, 0, 0, 0]]) == [2, 3, 3, 4], "3rd example"
+    assert checkio([[0,0,0,0,0,0],
+                    [0,0,0,0,1,0],
+                    [0,0,1,1,0,0],
+                    [0,0,1,1,0,0],
+                    [0,0,0,0,0,0],
+                    [0,0,0,0,0,0]]) == [5], "4th example"
