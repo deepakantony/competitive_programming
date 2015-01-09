@@ -1,12 +1,11 @@
 #m={'fib':(0,1,1,1,1,0),'tri':(0,1,1,1,1,1),'luc':(2,1,3,1,1,0),'jac':(0,1,1,1,2,0),'pel':(0,1,2,2,1,0),'per':(3,0,2,0,1,1),'pad':(0,1,1,0,1,1)}
 
 def fibgolf(t,n):
-    m={'ib':'011110','ri':'011111','uc':'213110','ac':'011120','el':'012210','er':'302011','ad':'011011'}
-    f,g,h,a,b,c=t=list(map(int,m[t[1:3]]))
+    f,g,h,a,b,c=t=list(map(int,{'ib':'011110','ri':'011111','uc':'213110','ac':'011120','el':'012210','er':'302011','ad':'011011'}[t[1:3]]))
     while n>2:
         h,g,f=a*h+b*g+c*f,h,g
         n-=1
-    return (h,t[n])[n<2]
+    return t[n] if n<2 else h
 
 if __name__ == '__main__':
     assert fibgolf('fibonacci', 10) == 55
