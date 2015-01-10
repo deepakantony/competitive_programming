@@ -1,11 +1,19 @@
-n=[(-1,-1),(-1,0),(-1,1),(0,-1),(0,1),(1,-1),(1,0),(1,1)]
-def golf(t,a=0,r=1):
- while r+1<len(t):
-  c=1
-  while c+1<len(t[r]):a+=t[r][c]==' '*all(c+j<len(t[r+i])and t[r+i][c+j]!=' 'for i,j in n);c+=1
-  r+=1
+# store a set of points that are spaces and then do a check
+e=enumerate
+def golf(t):
+ s={(r+1,c+1) for r,a in e(t[1:-1])for c,b in e(a[1:-1])if b==' '}
+ a=sum(1 for x,y in s if all((x+i,y+j)not in s for i,j in zip([1,-1,0]*3,[1,-1]*3+[0,0])))
+ print(a,s)
+ print([(x,y) for x,y in s if all((x+i,y+j)not in s for i,j in zip([1,-1,0]*3,[1,-1]*3+[0,0]))])
  return a
 
+
+# this algo goes through all spaces and checks if it's surround
+z=range
+l=len
+golf1=lambda t:sum(t[r][c]==' '*all(c+j<l(t[r+i])and t[r+i][c+j]!=' 'for i,j in zip([1,-1,0]*3,[1,-1]*3+[0,0]))for r in z(1,l(t)-1)for c in z(1,l(t[r])-1))
+
+ 
 if __name__ == "__main__":
  assert golf(["How are you doing?",
               "I'm fine. OK. Test",
