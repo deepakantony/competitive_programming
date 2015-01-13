@@ -1,5 +1,23 @@
+def invalid_queens(placed):
+    
+    return True
+
+def get_first_row_not_occupied(placed):
+    return ord(min(placed)[0])-ord('a')+1 if placed else 1
+
 def place_queens(placed):
-    return set()
+    res = set()
+    if invalid_queens(placed): return res
+
+    row = get_first_row_not_occupied(placed)
+    if row >= 8:
+        res = placed
+    else:
+        for col in range(1,9):
+            res = place_queens(placed + {chr(ord('a')+row-1)+str(col)})
+            if res:break;
+
+    return res
 
 
 if __name__ == '__main__':
