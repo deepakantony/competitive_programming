@@ -1,5 +1,59 @@
+from random import randint, choice
+
+neighbors = { (-1,-1),(-1,0),(-1,1),(0,-1),(0,1),(1,-1),(1,0),(1,1) }
+
+def count_marked_mines(field,row,col):
+    count = 0
+    for r,c in neighbors:
+        if 0 <= row+r < len(field) and 0 <= col+c < len(field[0]):
+            if field[row+r][col+c] == 9: count += 1
+    return count
+
+def count_unopened_squares(field,row,col):
+    count = 0
+    for r,c in neighbors:
+        if 0 <= row+r < len(field) and 0 <= col+c < len(field[0]):
+            if field[row+r][col+c] == -1: count += 1
+    return count
+
+def get_first_unopened_square(field,row,col):
+    for r,c in neighbors:
+        if 0 <= row+r < len(field) and 0 <= col+c < len(field[0]):
+            if field[row+r][col+c] == -1: return (row+r,col+c)
+    return (0,0)
+
+
+def pattern_search(field):
+    # basic pattern search; should be good enough for beginner minesweeper setups
+    for row,row_data in enumerate(field):
+        for col,x in enumerate(row_data):
+            marked_mines = count_marked_mines(field,row,col)
+            unopened_squares = count_unopened_squares(field,row,col)
+            if unopened_squares > 0 and x == (unopened_squares + marked_mines):
+                # find an unopened square and return True
+                r,c = get_first_unopened_square(field,row,col)
+                return [True, r, c]
+
+            if x == marked_mines and unopened_squares > 0:
+                # find an unopened square and return False
+                r,c = get_first_unopened_square(field,row,col)
+                return [False, r, c]
+    return None
+
 def checkio(field):
-    return [False, 0, 0]
+    res = None
+    if all( x < 0 for row in field for x in row ):
+        res = [False, 0, 0]
+    else:
+        ps = pattern_search(field)
+        if ps: res = ps
+    
+    if not res:
+        # leave it for luck
+        luck = [ choice([True,False]), randint(0,len(field)), randint(0,len(field[0])) ]
+        res = luck
+        
+    return res
 
 #This part is using only for self-testing
 if __name__ == '__main__':
