@@ -38,17 +38,17 @@ def isPrime(num):
 def generatePrimes(size=10000000000):
     pass
 
-def printPrime(lowRange, highRange, primtList):
+def printPrime(lowRange, highRange ):
     for num in xrange(lowRange, highRange+1):
-        if primeList[num]:
+        if isPrime(num):
             print num
 
 def main():
-    primeList = PrimeList(1000000000)
+    #primeList = PrimeList(100000000)
     numOfTests = int(raw_input().strip())
     for dummyIndex in xrange(numOfTests):
         (lowRange, highRange) = tuple(map(int, raw_input().strip().split()))
-        printPrime(lowRange, highRange, primeList)
+        printPrime(lowRange, highRange)
         print
 
 if __name__ == "__main__":
