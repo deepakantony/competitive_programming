@@ -75,7 +75,7 @@ void solve()
 		y = points[i].second.first;
 		z = points[i].second.second;
 		
-		FOR(j, i, point_count)
+		FOR(j, i+1, point_count)
 		{
 			int a, b, c;
 			a = abs(points[j].first - x);
@@ -87,9 +87,11 @@ void solve()
 				break;
 
 			double dist = sqrt( a*a + b*b + c*c );
-			cout << max_dist << dist << endl;
+
 			if( dist >= 0 && dist < 10)
 				hist[(int)(dist)] += 1;
+
+			cout << max_dist << dist << points[i] << points[j] << hist << endl;
 		}
 	}
 
