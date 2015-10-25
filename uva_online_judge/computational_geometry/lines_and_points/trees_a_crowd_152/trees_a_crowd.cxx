@@ -31,6 +31,7 @@ typedef vector<VL> VVL;
 typedef vector<PII> VPII;
 typedef vector<VPII> VVPII;
 typedef vector<PIII> VPIII;
+typedef vector<double> VD;
 
 #define REP(i, n) for(int i = 0; i < (n); ++i)
 #define FOR(i, st, nd) for(int i = (st); i < (nd); ++i)
@@ -68,34 +69,36 @@ void solve()
 
 	int point_count = points.size();
 	VI hist(10, 0);
+	VD dist(point_count, 10.0);
 	
 	REP(i, point_count )
 	{
 		x = points[i].first;
 		y = points[i].second.first;
 		z = points[i].second.second;
-		
+
 		FOR(j, i+1, point_count)
 		{
 			int a, b, c;
 			a = abs(points[j].first - x);
 			b = abs(points[j].second.first - y);
 			c = abs(points[j].second.second - z);
-			int max_dist = max(a,max(b,c));
+			int max_directional_dist = max(a,max(b,c));
 
-			if( max_dist >= 10 )
+			//cout << max_directional_dist << " "  << dist << points[i] << points[j] << hist << endl;
+
+			if( max_directional_dist >= 10 )
 				break;
 
-			double dist = sqrt( a*a + b*b + c*c );
-
-			if( dist >= 0 && dist < 10)
-				hist[(int)(dist)] += 1;
-
-			cout << max_dist << dist << points[i] << points[j] << hist << endl;
+			double dist_i_j = sqrt( a*a + b*b + c*c );
+			dist[i] = min(dist_i_j, dist[i]);
+			dist[j] = min(dist_i_j, dist[j]);
 		}
-	}
 
-	cout << points << endl;
+		if( dist[i] >= 0 && dist[i] < 10)
+			hist[(int)(dist[i])] += 1;
+
+	}
 
 	REP(i, 10)
 		cout << setw(4) << right << hist[i];
