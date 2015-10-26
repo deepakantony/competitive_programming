@@ -36,6 +36,10 @@ typedef vector<VPII> VVPII;
 
 #define INF numeric_limits<int>::max()
 
+#define EPS 1e-9
+
+bool operator==(double a, double b) { return (abs(a-b) < EPS); }
+
 template<class T>
 struct Point {
 	T x,y;
@@ -49,7 +53,7 @@ struct LineSegment {
 };
 template<class T>
 struct Line {
-	T a,b,c;
+	double a,b,c;
 	Line( Point<T> const &pt1, Point<T> const &pt2 ) {
 		// slope intercept formula
 		// y - y1 = m ( x - x1 )
@@ -79,7 +83,7 @@ struct Line {
 
 	bool operator==(Line<T> const &other ) { return a == other.a && b == other.b && c == other.c; }
 
-	
+	bool Parallel(Line<T> const &other) { return a == other.a && b == other.b; }
 };
 
 void solve()
