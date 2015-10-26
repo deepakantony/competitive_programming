@@ -87,8 +87,8 @@ void solve()
 
 			//cout << max_directional_dist << " "  << dist << points[i] << points[j] << hist << endl;
 
-			if( max_directional_dist >= 10 )
-				break;
+			//if( max_directional_dist > 10 )
+			//break;
 
 			double dist_i_j = sqrt( a*a + b*b + c*c );
 			dist[i] = min(dist_i_j, dist[i]);
@@ -101,7 +101,7 @@ void solve()
 	}
 
 	REP(i, 10)
-		cout << setw(4) << right << hist[i];
+	  cout << setw(4) << right << hist[i];
 	cout << endl;
 }
 
