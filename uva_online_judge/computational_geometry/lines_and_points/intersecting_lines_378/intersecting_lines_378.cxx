@@ -1,9 +1,8 @@
 /*
   Problem: Template CPP main file.
-  Link: 
+  Link: https://uva.onlinejudge.org/external/3/378.html
   Author: Deepak Antony - "deebee" "drunkbeast" "dAbeAst"
-  Solution:
-
+  Solution: 
 */
 
 #include <cstdio>
