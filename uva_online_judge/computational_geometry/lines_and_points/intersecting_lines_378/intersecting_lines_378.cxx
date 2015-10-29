@@ -82,12 +82,13 @@ struct Line {
 		b =pt1.x - pt2.x;
 		c =pt2.x*pt1.y - (pt1.x*pt2.y);
 
-		// normalize (ensures comparing lines for equality easier)
-		if( !FLT_EQ(a,0) ) {
-			a /= a; b /= a; c /= a;
-		} else if( b != 0 ) {
-			a /= b; b /= b; c /= b;
+		if( !FLT_EQ(a,0) && !FLT_EQ(b,0) )
+		{
+			// normalize (ensures comparing lines for equality easier)
+			double denom = ( !FLT_EQ(a,0) ) ? a : b;
+			a /= denom; b /= denom; c /= denom;
 		}
+		else c = 0.0; // a == b == c == 0; NOT a line at all; but we'll allow this
 	}
 	Line(LineSegment<T> const &ls ) : Line(ls.pt1, ls.pt2) {}
 	
@@ -95,9 +96,13 @@ struct Line {
 		return (a * pt.x + b * pt.y + c);
 	}
 
-	bool operator==(Line<T> const &other ) const { return a == other.a && b == other.b && c == other.c; }
+	bool operator==(Line<T> const &other ) const {
+		return FLT_EQ(a,other.a) && FLT_EQ(b,other.b) && FLT_EQ(c,other.c);
+	}
 
-	bool Parallel(Line<T> const &other) const { return a == other.a && b == other.b; }
+	bool Parallel(Line<T> const &other) const {
+		return FLT_EQ(a,other.a) && FLT_EQ(b,other.b);
+	}
 
 	bool Intersects(Line<T> const &other, Point<T> &intersection_point) const {
 		if( (*this) == other || Parallel(other) ) return false;
@@ -133,7 +138,7 @@ void solve()
 		Line<double> l1(Point<double>(x1,y1), Point<double>(x2,y2));
 		Line<double> l2(Point<double>(x3,y3), Point<double>(x4,y4));
 
-		cout << l1 << l2 << endl;
+		//cout << l1 << l2 << endl;
 
 		if( l1 == l2 )
 			cout << "LINE" << endl;
