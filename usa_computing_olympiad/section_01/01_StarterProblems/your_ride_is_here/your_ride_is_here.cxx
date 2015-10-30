@@ -1,8 +1,14 @@
 /*
+  ID: deepaka2
+  LANG: c++11
+  PROG: ride
+*/
+
+/*
   Problem: Template CPP main file.
-  Link:
+  Link: section 1.1
   Author: Deepak Antony - "deebee" "drunkbeast" "dAbeAst"
-  Solution: 
+  Solution: easy!
 */
 
 #include <cstdio>
@@ -38,6 +44,12 @@ typedef vector<VPII> VVPII;
 #define INF numeric_limits<int>::max()
 #define EPS (1e-9)
 #define FLT_EQ(x,y) ((fabs((x)-(y))) < EPS)
+
+void solve()
+{
+	string comet, group;
+	cin >> comet >> group;
+}
 
 int main(int argc, char *argv[]) {
 #ifndef ONLINE_JUDGE
