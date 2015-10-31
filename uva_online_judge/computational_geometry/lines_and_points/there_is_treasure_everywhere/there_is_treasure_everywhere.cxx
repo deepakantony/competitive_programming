@@ -46,7 +46,7 @@ struct Point {
 	T x, y;
 	Point(T x, T y) : x(x), y(y) {}
 	Point() : Point(0,0){}
-	Point<T> &operator+(Point<T> other) const {
+	Point<T> operator+(Point<T> other) const {
 		other += *this;
 		return other;
 	}
@@ -54,26 +54,63 @@ struct Point {
 		x += other.x; y += other.y;
 		return *this;
 	}
+	double Distance(Point<T> const &other)const {
+		T dx = x-other.x; T dy = y - other.y;
+		return sqrt( dx*dx + dy*dy );
+	}
+	template<class Scalar>
+	Point<T> operator*(Scalar k) const {
+		Point<T> res(x*k, y*k);
+		return res;
+	}
 };
+
+template<class T>
+ostream &operator<<(ostream &os, Point<T> const &pt) {
+	os << "(" << pt.x << "," << pt.y << ")";
+	return os;
+}
 
 void solve()
 {
 	string const directions( "NSEW" );
-	const map<string,Point<double>> dir_to_point_map {
+	map<string,Point<double>> dir_to_point_map {
 		{ "N", {0,1} },
-		{ "NE", {1,1} },
+		{ "NE", {0.7071067811865475,0.7071067811865475} },
 		{ "E", {1,0}},
-		{"SE", {1,-1}},
+		{"SE", {0.7071067811865475,-0.7071067811865475} },
 		{"S", {0,-1}},
-		{"SW", {-1,-1}},
+		{"SW", {-0.7071067811865475,-0.7071067811865475} },
 		{"W", {-1,0}},
-		{"NW", {-1,1}}};
+		{"NW", {-0.7071067811865475,0.7071067811865475}}};
 														
 	string line;
+	int map_n = 0;
 	while( ( cin >> line ) && line != "END" )
 	{
-		cout << line << endl;
+		cout << "Map #" << ++map_n << endl;
+		
+		//cout << line << endl;
+		replace(line.begin(), line.end(), ',', ' ');
+		replace(line.begin(), line.end(), '.', ' ');
 		stringstream ss(line);
+
+		Point<double> origin(0.,0.);
+		Point<double> destination(0.,0.);
+		int step; string direction;
+		while ( ( ss >> step >> direction ) )
+		{
+			if( direction.size() == 0 ) break;
+
+			destination += (dir_to_point_map[direction]*step);
+			//cout << step << " " << direction << destination << endl;
+		}
+		double distance = origin.Distance(destination);
+
+		cout << setprecision(3) << fixed << "The treasure is located at " << destination << "." << endl;
+		cout << setprecision(3) << fixed << "The distance to the treasure is " << distance << "." << endl;
+
+		cout << endl;
 	}
 }
 
