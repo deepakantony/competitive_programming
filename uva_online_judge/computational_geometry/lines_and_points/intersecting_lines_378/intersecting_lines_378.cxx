@@ -65,6 +65,14 @@ struct LineSegment {
 	Point<T> pt1, pt2;
 	LineSegment(Point<T> pt1, Point<T> pt2) : pt1(pt1), pt2(pt2) {}
 };
+
+template<class T> struct Line;
+template<class T>
+ostream& operator<<(ostream &os, Line<T> l) {
+	os << "(" << l.a << ", " << l.b << ", " << l.c << ")";
+	return os;
+}
+
 template<class T>
 struct Line {
 	double a,b,c;
@@ -82,7 +90,7 @@ struct Line {
 		b =pt1.x - pt2.x;
 		c =pt2.x*pt1.y - (pt1.x*pt2.y);
 
-		if( !FLT_EQ(a,0) && !FLT_EQ(b,0) )
+		if( !FLT_EQ(a,0) || !FLT_EQ(b,0) )
 		{
 			// normalize (ensures comparing lines for equality easier)
 			double denom = ( !FLT_EQ(a,0) ) ? a : b;
@@ -111,19 +119,15 @@ struct Line {
 			intersection_point.x = (-c-b*intersection_point.y)/a;
 		}
 		else { // other.a should not be 0
+			//cout << *this << other << endl;
 			assert(other.a != 0);
+			
 			intersection_point.y = -c/b;
 			intersection_point.x = (-other.c-other.b*intersection_point.y)/other.a;
 		}
 		return true;
 	}
 };
-
-template<class T>
-ostream& operator<<(ostream &os, Line<T> l) {
-	os << "(" << l.a << ", " << l.b << ", " << l.c << ")";
-	return os;
-}
 
 
 void solve()
