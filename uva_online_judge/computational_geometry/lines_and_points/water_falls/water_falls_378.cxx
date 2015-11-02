@@ -18,6 +18,8 @@
     y = -c1/b1
 	x = (-c2 - b2y)/a2  --- a2 cannot be 0; if 0 the lines are parallel as a2 == a1 & b2 == b1 when normalized
 
+  For each source:
+    Check if it is 
   
 */
 
@@ -95,7 +97,7 @@ struct Line {
 		if( !FLT_EQ(a,0) || !FLT_EQ(b,0) )
 		{
 			// normalize (ensures comparing lines for equality easier)
-			double denom = ( !FLT_EQ(a,0) ) ? a : b;
+			double denom = ( !FLT_EQ(b,0) ) ? b : a;
 			a /= denom; b /= denom; c /= denom;
 		}
 		else c = 0.0; // a == b == c == 0; NOT a line at all; but we'll allow this
