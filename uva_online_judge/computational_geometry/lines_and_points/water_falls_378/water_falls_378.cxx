@@ -1,26 +1,13 @@
 /*
   Problem: Template CPP main file.
-  Link: 
+  Link: https://uva.onlinejudge.org/external/8/833.pdf
   Author: Deepak Antony - "deebee" "drunkbeast" "dAbeAst"
   Solution: Line equation is f(x,y) = ax+by+c = 0
-  Two lines would be a1x+b1y+c1 =0 & a2x+b2y+c2 = 0
-  If the lines are parallel - a1 == a2 && b1 == b2.
-  If they are the same lines then a1 == a2 && b1 == b2 && c1 == c2.
-  If they intersect, solve for x & y with the two equations.
-  if a1 != 0:
-    x = (-c1 - b1y)/a1
-	y = (-c2 - a2x)/b2 = (-c2 - a2 (-c1 - b1y)/a1 ) /b2
-	y = ( -a1c2 + a2c1 + a2b1y )/a1b2
-	a1b2y - a2b1y = a2c1 - a1c2
-	y = (a2c1-a1c2)/(a1b2-a2b1)
-	Then substitute y in the eq for x (above)
-  else
-    y = -c1/b1
-	x = (-c2 - b2y)/a2  --- a2 cannot be 0; if 0 the lines are parallel as a2 == a1 & b2 == b1 when normalized
-
-  For each source:
-    Check if it is 
+  when b = 1, point is above the line when f(x,y) > 0, below the line f(x,y) < 0 or on when = 0.
   
+  For each source:
+     source_line_segment_map = [ list of line segments below the point i.e. point projects down to the line ]
+	 
 */
 
 #include <cstdio>
@@ -65,10 +52,28 @@ struct Point {
 	Point(T x, T y) : x(x), y(y){}
 };
 template<class T>
+ostream& operator<<(ostream &os, Point<T> p) {
+	os << "(" << p.x << ", " << p.y << ")";
+	return os;
+}
+
+template<class T>
 struct LineSegment {
 	Point<T> pt1, pt2;
 	LineSegment(Point<T> pt1, Point<T> pt2) : pt1(pt1), pt2(pt2) {}
 };
+template<class T>
+ostream& operator<<(ostream &os, LineSegment<T> l) {
+	os << "[" << l.pt1 << ", " << l.pt2 << "]";
+	return os;
+}
+
+// custom operator< for this problem
+// Sort by the y coordinate
+template<class T>
+bool operator<(const LineSegment<T> &lhs, const LineSegment<T> &rhs) {
+	return (min(lhs.pt1.y, lhs.pt2.y) > min(rhs.pt1.y, rhs.pt2.y));
+}
 
 template<class T> struct Line;
 template<class T>
@@ -133,33 +138,44 @@ struct Line {
 	}
 };
 
+template<class T>
+bool PointXProjectionIntersectsLineSegment(Point<T> const &pt, LineSegment<T> const &ls)
+{
+	T minx = min(ls.pt1.x, ls.pt2.x);
+	T maxx = max(ls.pt1.x, ls.pt2.x);
+	return (pt.x >= minx && pt.x <= maxx && Line<T>(ls).SolveForPoint(pt) > 0);
+}
 
 void solve()
 {
-	int n_tests;
-	cin >> n_tests;
-	cout << "INTERSECTING LINES OUTPUT" << endl;
-	
-	while ( n_tests-- ) {
-		int x1,y1, x2,y2, x3,y3, x4,y4;
-		cin >> x1 >> y1 >> x2 >> y2 >> x3 >> y3 >> x4 >> y4;
-		Line<double> l1(Point<double>(x1,y1), Point<double>(x2,y2));
-		Line<double> l2(Point<double>(x3,y3), Point<double>(x4,y4));
+	int n_tests; cin >> n_tests;
 
-		//cout << l1 << l2 << endl;
-
-		if( l1 == l2 )
-			cout << "LINE" << endl;
-		else if ( l1.Parallel(l2) )
-			cout << "NONE" << endl;
-		else {
-			Point<double> pt;
-			assert( l1.Intersects(l2, pt) );
-			cout << "POINT " << fixed << setprecision(2) << pt.x << " " << pt.y << endl;
+	while( n_tests-- ){
+		int n_ls;
+		cin >> n_ls;
+		vector<LineSegment<int>> ls_list;
+		while(n_ls--) {
+			int x1,y1,x2,y2;
+			cin >> x1 >> y1 >> x2 >> y2;
+			ls_list.push_back(LineSegment<int>(Point<int>(x1,y1), Point<int>(x2,y2)));
 		}
+		sort(ls_list.begin(), ls_list.end());
+		int n_srcs;
+		cin >> n_srcs;
+		while( n_srcs-- ) {
+			int x,y;
+			cin >> x >> y;
+			Point<int> pt(x,y);
+			for(const LineSegment<int> &ls : ls_list) {
+				bool pt_p_ls = PointXProjectionIntersectsLineSegment( pt, ls );
+				//cout << pt << ls << pt_p_ls << endl;
+				if ( pt_p_ls ) pt = ( ls.pt1.y < ls.pt2.y ) ? ls.pt1 : ls.pt2;
+			}
+
+			cout << pt.x << endl;
+		}
+		if( n_tests ) cout << endl;
 	}
-		
-	cout << "END OF OUTPUT" << endl;
 }
 
 int main(int argc, char *argv[]) {
