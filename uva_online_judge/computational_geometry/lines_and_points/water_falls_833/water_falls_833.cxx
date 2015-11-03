@@ -109,7 +109,7 @@ struct Line {
 	}
 	Line(LineSegment<T> const &ls ) : Line(ls.pt1, ls.pt2) {}
 	
-	T SolveForPoint(Point<T> const &pt) {
+	double SolveForPoint(Point<T> const &pt) {
 		return (a * pt.x + b * pt.y + c);
 	}
 
@@ -143,7 +143,10 @@ bool PointXProjectionIntersectsLineSegment(Point<T> const &pt, LineSegment<T> co
 {
 	T minx = min(ls.pt1.x, ls.pt2.x);
 	T maxx = max(ls.pt1.x, ls.pt2.x);
-	return (pt.x >= minx && pt.x <= maxx && Line<T>(ls).SolveForPoint(pt) > 0);
+	Line<T> l(ls);
+	double fxy = l.SolveForPoint(pt);
+	//cout << l << " " << fxy << " ";
+	return (pt.x >= minx && pt.x <= maxx && fxy > (0.0-EPS));
 }
 
 void solve()
