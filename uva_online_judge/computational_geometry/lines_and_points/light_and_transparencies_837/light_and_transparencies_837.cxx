@@ -19,6 +19,7 @@
 #include <limits>
 #include <iostream>
 #include <iomanip>
+#include <map>
 
 using namespace std;
 
@@ -54,13 +55,30 @@ void solve()
 	{
 		int nl; cin >> nl;
 
+		mdd pt_2_coef;
 		while(nl--)
 		{
-			double x1,y1,x2,y2;
-			cin >> x1 >> y1 >> x2 >> y2;
+			double x1,y1,x2,y2,coef;
+			cin >> x1 >> y1 >> x2 >> y2 >>coef;
+			double minx = min(x1,x2);
+			double maxx = max(x1,x2);
 
-			
+			pt_2_coef[minx] = coef;
+			pt_2_coef[maxx] = 1.0/coef;
 		}
+
+		double cur_coef = 1.0;
+		cout << pt_2_coef.size() + 1 << "\n";
+		cout << "-inf ";
+		for( auto v : pt_2_coef )
+		{
+			// cout << v.first <<  " " << v.second << "\n";
+			cout << fixed << setprecision(3)  << v.first << " " << cur_coef << "\n";
+			cout << fixed << setprecision(3) << v.first << " ";
+			cur_coef *= v.second;
+		}
+		cout << "+inf 1.000\n";
+		if( n_cases > 0 ) cout << "\n";
 	}
 }
 
