@@ -1,8 +1,11 @@
 /*
   Problem: Template CPP main file.
-  Link:
+  Link: https://uva.onlinejudge.org/external/8/837.pdf
   Author: Deepak Antony - "deebee" "drunkbeast" "dAbeAst"
-  Solution: 
+  Solution:
+  Sort end points. The min_x of two ends gets the transperancy_coefficient, 
+  while the other gets the reciprocal. Multiply with the coefficient as we go 
+  through the points and we get the desired output.
 */
 
 #include <cstdio>
@@ -39,11 +42,34 @@ typedef vector<VPII> VVPII;
 #define EPS (1e-9)
 #define FLT_EQ(x,y) ((fabs((x)-(y))) < EPS)
 
+bool dbl_eq(double x, double y) { return FLT_EQ(x,y); }
+
+typedef map<double, double> mdd;
+
+
+void solve()
+{
+	int n_cases; cin >> n_cases;
+	while(n_cases--)
+	{
+		int nl; cin >> nl;
+
+		while(nl--)
+		{
+			double x1,y1,x2,y2;
+			cin >> x1 >> y1 >> x2 >> y2;
+
+			
+		}
+	}
+}
+
 int main(int argc, char *argv[]) {
 #ifndef ONLINE_JUDGE
 	clock_t start = clock();
 #endif 
 	// solve something here
+	solve();
 
 #ifndef ONLINE_JUDGE
 	fprintf(stderr, "Time taken : %.5f seconds.\n",
