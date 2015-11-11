@@ -18,6 +18,7 @@
 #include <limits>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 
 using namespace std;
 
@@ -49,10 +50,12 @@ void solve()
 	while( cin >> cur_size >> new_adds ) {
 		double tot_dist = 0.0;
 
-		if( new_adds > 1 && cur_size > 0 )
+		if( new_adds > 0 && cur_size > 1 )
 		{
 			double cur_split = circumf / cur_size;
-			double new_split = circumf / new_adds;
+			double new_split = circumf / (new_adds+cur_size);
+
+			//cout << cur_split << " " << new_split << endl;
 
 			int i = 0;
 			double cur_pos = 0.0;
@@ -60,15 +63,25 @@ void solve()
 			{
 				int j = i;
 				double new_pos = j * new_split;
-				double min_dist = numeric_limits<double>::max();
+				double min_dist = fabs( cur_pos - new_pos );
 				for( ; new_pos < (circumf+EPS); ++j, new_pos = j * new_split )
 				{
-					
+					if( min_dist < fabs( cur_pos - new_pos ) )
+						break;
+					//cout << cur_pos << "  " << new_pos << " " << fabs( cur_pos - new_pos ) << endl;
+					min_dist = min( min_dist, fabs( cur_pos - new_pos ) );
 				}
+
+				tot_dist += min_dist;
 			}
 		}
-		
-		cout << tot_dist << "\n";
+		//cout.precision(4);
+		stringstream ss;
+		ss << tot_dist;
+		if ( ss.str().find('.') == string::npos )
+			cout << ss.str() << ".0\n";
+		else
+			cout << setprecision(4) << fixed <<  tot_dist << "\n";
 	}
 }
 
