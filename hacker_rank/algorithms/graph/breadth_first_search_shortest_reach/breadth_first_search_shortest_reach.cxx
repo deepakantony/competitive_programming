@@ -59,7 +59,6 @@ void solve()
 		queue<int> Q;
 		Q.push(S);
 		dist[S] = 0;
-		int cur_dist = 0;
 		while(!Q.empty())
 		{
 			int x = Q.front();
@@ -68,10 +67,8 @@ void solve()
 			for( auto y : G[x] )
 				if ( dist[y] == -1 ) {
 					Q.push(y);
-					dist[y] = cur_dist + 6;
+					dist[y] = dist[x] + 6;
 				}
-		
-			cur_dist += 6;
 		}
 		
 		REP(i, N)
