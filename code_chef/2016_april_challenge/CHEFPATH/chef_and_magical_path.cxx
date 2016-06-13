@@ -1,8 +1,8 @@
 /*
-  Problem: Template CPP main file.
-  Link:
+  Problem: Chef and magical path
+  Link:https://www.codechef.com/APRIL16/problems/CHEFPATH
   Author: Deepak Antony - "deebee" "drunkbeast" "dAbeAst"
-  Solution: 
+  Solution: deduce by plotting out few examples.
 */
 
 #include <cstdio>
@@ -41,11 +41,25 @@ typedef vector<VPII> VVPII;
 #define EPS (1e-9)
 #define FLT_EQ(x,y) ((fabs((x)-(y))) < EPS)
 
+void solve()
+{
+	int T; cin >>T;
+	while(T--)
+	{
+		UL N, M; cin >> N >> M; // cout << N << " " << M << "->";
+		if( (N == 1 && M==2 ) || ( N==2 && M==1 ) ) cout << "Yes" <<endl;
+		else if( N==1 || M == 1) cout << "No" << endl;
+		else if( N%2 && M%2 ) cout << "No" <<endl;
+		else cout << "Yes" << endl;
+	}
+}
+
 int main(int argc, char *argv[]) {
 #ifndef ONLINE_JUDGE
 	clock_t start = clock();
 #endif 
 	// solve something here
+	solve();
 
 #ifndef ONLINE_JUDGE
 	fprintf(stderr, "Time taken : %.5f seconds.\n",

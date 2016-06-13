@@ -1,8 +1,8 @@
 /*
-  Problem: Template CPP main file.
-  Link:
+  Problem: Help watson escape
+  Link: https://www.codechef.com/APRIL16/problems/BIPIN3
   Author: Deepak Antony - "deebee" "drunkbeast" "dAbeAst"
-  Solution: 
+  Solution: counting
 */
 
 #include <cstdio>
@@ -40,12 +40,41 @@ typedef vector<VPII> VVPII;
 #define INF numeric_limits<int>::max()
 #define EPS (1e-9)
 #define FLT_EQ(x,y) ((fabs((x)-(y))) < EPS)
+#define MOD (1000000007)
+
+LL mod_exp(LL x, LL y, LL mod)
+{
+	if( y == 0 )
+		return 1;
+	if( y == 1 )
+		return x;
+	if( y%2 ) // odd
+		return (mod_exp(x,y-1,mod)*x)%mod;
+	// even
+	LL res_y2 = mod_exp(x,y/2,mod);
+	return (res_y2*res_y2)%mod;
+}
+
+void solve()
+{
+	int T; cin >> T;
+
+	while(T--)
+	{
+		LL N,K; cin >> N >> K; //cout << N << " " << K << " -> ";
+		
+		LL ans = (K*mod_exp(K-1,N-1,MOD))%MOD;
+
+		cout << ans << endl;
+	}
+}
 
 int main(int argc, char *argv[]) {
 #ifndef ONLINE_JUDGE
 	clock_t start = clock();
 #endif 
 	// solve something here
+	solve();
 
 #ifndef ONLINE_JUDGE
 	fprintf(stderr, "Time taken : %.5f seconds.\n",
