@@ -55,18 +55,23 @@ void solve()
 		UL new_hi = A[i] + A[i-1];
 
 		if (cur_lo == 0 || cur_hi == 0) {
-			cur_lo = new_lo; cur_hi = new_hi;
+			cur_lo = new_lo;
+			cur_hi = new_hi;
 		}
-		else if ((new_hi-1) >= cur_lo)
+		else if (new_hi >= cur_lo)
 			cur_lo = min(cur_lo, new_lo);
 		else if (cur_lo <= R && (cur_hi-1) >= L) {
 			possible += min(cur_hi, R+1) - max(cur_lo, L);
 			cur_hi = new_hi;
 			cur_lo = new_lo;
 		}
+		else {
+			cur_hi = new_hi;
+			cur_lo = new_lo;
+		}
 	}
 
-	if (cur_lo <= R && (cur_hi-1) >= L) {
+	if (cur_lo > 0 && cur_lo <= R && (cur_hi-1) >= L) {
 		possible += min(cur_hi, R+1) - max(cur_lo, L);
 	}
 
