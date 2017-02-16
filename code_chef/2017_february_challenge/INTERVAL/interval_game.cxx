@@ -60,9 +60,9 @@ void sliding_window_sum( const VL &A, int window_size, VL &sum )
 
 ostream &operator<<(ostream &os, const multiset<LL> &A)
 {
-	os << "[ ";
+	os << "{ ";
 	for (auto it = A.rbegin(); it != A.rend(); ++it) os << *it << ", ";
-	os << "]";
+	os << "}";
 	return os;
 }
 
@@ -81,36 +81,26 @@ void sliding_window_max( const VL &A, int window_size, VL &mx )
 	}
 }
 
-void flip_sign(LL &sign)
-{
-	if (sign > 0) sign = -1;
-	else sign = 1;
-}
-
 ostream &operator<<(ostream &os, const VL &A)
 {
-	os << "[ ";
+	os << "[ (" << A.size() << ") -> ";
 	for (auto val : A) os << val << ", ";
 	os << "]";
 	return os;
 }
 
-void solve(const VL &A, const VL &B)
+LL solve(const VL &A, const VL &B)
 {
-	if (A.size() <= 2) {
-		cout << accumulate(A.begin(), A.end(), 0) << endl;
-		return;
-	}
-
 	VL sum;
 	VL mx;
-//	cout << "A: " << A << endl;
+	//cout << "A: " << A << endl;
+   	//cout << "B: " << B << endl;
 
 	sliding_window_sum(A, B[B.size()-1], sum);
 	for (int i = B.size()-2; i >= 0; --i)
 	{
 		sliding_window_max(sum, B[i]-2-B[i+1]+1, mx);
-		//cout << "Sum: " << sum << " Max: " << mx << endl;
+		//cout << "Sum: "<< B[i+1] << sum << " Max: " << B[i]-2-B[i+1]+1 << mx << endl;
 		// new sum 
 		sliding_window_sum(A, B[i], sum);
 		//cout << "\tNewSum: " << sum << endl;
@@ -118,8 +108,25 @@ void solve(const VL &A, const VL &B)
 		for ( int j = 0; j < sum.size(); ++j )
 			sum[j] -= mx[j+1];
 	}
-	//cout << "Sum: " << sum << " Max: " << mx << endl;
-	cout << *max_element(sum.begin(), sum.end()) << endl;
+	//cout << "Sum: " << B[0] << sum << endl;// << " Max: " << B[0]-2-B[1]+1<< mx << endl;
+	return ( *max_element(sum.begin(), sum.end()));
+}
+
+LL brute_recurse(const VL &A, const VL &B, int ai, int aj, int bi)
+{
+	if (bi == B.size()) return 0;
+	LL mx = numeric_limits<LL>::min();
+	for ( int i = ai+1; i < aj && (i+B[bi]) <= aj; ++i ) {
+		mx = max<LL>(mx, accumulate(A.begin()+i, A.begin()+i+B[bi], 0) - brute_recurse(A,B,i,i+B[bi]-1,bi+1));
+	}
+	//cout << "ai " << ai << ", aj " << aj << ", bi " << bi << " - mx: " << mx << endl;
+	return mx;
+}
+
+LL brute_force(const VL &A, const VL &B)
+{
+
+	return brute_recurse(A,B,-1,A.size(),0);
 }
 
 void solve()
@@ -131,7 +138,8 @@ void solve()
 		REP(i,N) cin >> A[i];
 		REP(i,M) cin >> B[i];
 
-		solve(A,B);
+		cout << solve(A,B) << endl;
+		//cout << brute_force(A,B) << endl;
 	}
 }
 
