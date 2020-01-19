@@ -18,7 +18,6 @@
 #include <iomanip>
 #include <string>
 #include <map>
-#include <iterator>
 
 using namespace std;
 
@@ -42,11 +41,24 @@ typedef vector<VPII> VVPII;
 #define EPS (1e-9)
 #define FLT_EQ(x,y) ((fabs((x)-(y))) < EPS)
 
+void solve() {
+	int T; cin >> T;
+	while(T--) {
+		int s, w1, w2, w3; cin >> s >> w1 >> w2 >> w3;
+		int res;
+		if(s>=(w1+w2+w3)) res = 1;
+		else if(s>=(w1+w2) || s>=(w2+w3)) res = 2;
+		else res = 3;
+		cout << res << endl;
+	}
+}
+
 int main(int argc, char *argv[]) {
 #ifndef ONLINE_JUDGE
 	clock_t start = clock();
 #endif
 	// solve something here
+	solve();
 
 #ifndef ONLINE_JUDGE
 	fprintf(stderr, "Time taken : %.5f seconds.\n",
